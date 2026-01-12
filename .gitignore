@@ -1,6 +1,13 @@
-.DS_Store
-.idea/
+### Maven
+target
 
-# Used to store files while they're modified for Wiki.
-docs
-**pycache**
+### IntelliJ IDEA ###
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### Mac OS ###
+.DS_Store
+
+### Chess project ###
+server/**/db.properties
