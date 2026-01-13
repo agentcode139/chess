@@ -1,7 +1,9 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Represents a single chess piece
@@ -56,13 +58,45 @@ public class ChessPiece {
         ChessPiece piece = board.getPiece(myPosition);
         return switch (piece.getPieceType()) {
             case PieceType.BISHOP ->
-                // Hard Coded example test
-                    List.of(new ChessMove(new ChessPosition(5, 4), new ChessPosition(1, 8), null));
+                    List.of(new ChessMove(myPosition, new ChessPosition(1, 8), null));
             case PieceType.KING -> List.of();
             case PieceType.KNIGHT -> List.of();
             case PieceType.PAWN -> List.of();
             case PieceType.QUEEN -> List.of();
-            case PieceType.ROOK -> List.of();
+            case PieceType.ROOK -> List.of();// validRookMoves(piece, myPosition);
         };
+    }
+
+    // to memory heavy
+    private Collection<ChessMove> validRookMoves(ChessPiece piece, ChessPosition position){
+        //init
+        List<ChessMove> moves = new ArrayList<ChessMove>();
+        int i;
+        // UP
+        i = 1;
+        while (position.getColumn() + i < 9){
+            moves.add(new ChessMove(position, new ChessPosition(position.getRow(), position.getColumn()+i), null));
+            i++;
+        }
+        // DOWN
+        i = 1;
+        while (position.getColumn() - i > 0){
+            moves.add(new ChessMove(position, new ChessPosition(position.getRow(), position.getColumn()-i), null));
+            i--;
+        }
+        // LEFT
+        i = 1;
+        while (position.getRow() - i > 0){
+            moves.add(new ChessMove(position, new ChessPosition(position.getRow()-i, position.getColumn()), null));
+            i--;
+        }
+        // RIGHT
+        i = 1;
+        while (position.getRow() + i < 9){
+            moves.add(new ChessMove(position, new ChessPosition(position.getRow()+i, position.getColumn()), null));
+            i++;
+        }
+
+        return moves;
     }
 }
