@@ -8,7 +8,7 @@ package chess;
  */
 public class ChessBoard {
 
-    ChessPiece[][] gameboard = new ChessPiece[8][8];
+    ChessPiece[][] gameboard = new ChessPiece[8][8]; //Valid spots range: {0 < i,j <= 8}
 
     public ChessBoard() {
     }
@@ -39,6 +39,11 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        throw new RuntimeException("Not implemented");
+        gameboard = new ChessPiece[8][8];
+        // Pawns
+        for (int i = 1; i <= 8; i++){
+            this.addPiece(new ChessPosition(2,i), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
+            this.addPiece(new ChessPosition(7,i), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
+        }
     }
 }
