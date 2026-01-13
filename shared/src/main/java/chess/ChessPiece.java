@@ -54,27 +54,15 @@ public class ChessPiece {
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         ChessPiece piece = board.getPiece(myPosition);
-
-        switch (piece.getPieceType()){
-            case PieceType.BISHOP:
+        return switch (piece.getPieceType()) {
+            case PieceType.BISHOP ->
                 // Hard Coded example test
-                return List.of(new ChessMove(new ChessPosition(5,4), new ChessPosition(1,8), null));
-
-            case PieceType.KING:
-                break;
-
-            case PieceType.KNIGHT:
-                break;
-
-            case PieceType.PAWN:
-                break;
-
-            case PieceType.QUEEN:
-                break;
-
-            case PieceType.ROOK:
-                break;
-        }
-        return List.of();
+                    List.of(new ChessMove(new ChessPosition(5, 4), new ChessPosition(1, 8), null));
+            case PieceType.KING -> List.of();
+            case PieceType.KNIGHT -> List.of();
+            case PieceType.PAWN -> List.of();
+            case PieceType.QUEEN -> List.of();
+            case PieceType.ROOK -> List.of();
+        };
     }
 }
