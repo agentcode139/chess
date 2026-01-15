@@ -10,6 +10,7 @@ import java.util.List;
 
 public class PawnMoveCalculator implements ChessMoveCalculator {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position){
+        //TODO implement Pawn movement (needs direction)
         return List.of();
     }
 }
