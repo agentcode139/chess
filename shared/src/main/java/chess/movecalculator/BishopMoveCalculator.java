@@ -4,7 +4,6 @@ import chess.*;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class BishopMoveCalculator implements ChessMoveCalculator {
@@ -19,8 +18,6 @@ public class BishopMoveCalculator implements ChessMoveCalculator {
             // IF PIECE in spot (Add if opposite color)
             ChessPosition movePosition = new ChessPosition(position.getRow()+i,position.getColumn()+i);
             if (board.getPiece(movePosition) != null){
-                ChessPiece check = board.getPiece(position);
-                ChessPiece test = board.getPiece(movePosition);
                if (board.getPiece(movePosition).getTeamColor() != board.getPiece(position).getTeamColor()){
                    validMoves.add(new ChessMove(position,movePosition,null));
                }
@@ -78,6 +75,5 @@ public class BishopMoveCalculator implements ChessMoveCalculator {
         }
 
         return validMoves;
-
     }
 }
