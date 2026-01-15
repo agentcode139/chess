@@ -8,7 +8,7 @@ import java.util.Set;
 
 public class BishopMoveCalculator implements ChessMoveCalculator {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position){
-        Set<ChessMove> validMoves = new HashSet<ChessMove>();
+        Set<ChessMove> validMoves = new HashSet<>();
         //UPRIGHT
         for (int i = 1; i<9; i++) {
             // Check if move is out of bounds

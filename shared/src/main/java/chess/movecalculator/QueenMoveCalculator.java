@@ -7,12 +7,11 @@ import chess.ChessPosition;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class QueenMoveCalculator implements ChessMoveCalculator {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position){
-        Set<ChessMove> validMoves = new HashSet<ChessMove>();
+        Set<ChessMove> validMoves = new HashSet<>();
         //UP
         for (int i = 1; i<9; i++) {
             // Check if move is out of bounds
