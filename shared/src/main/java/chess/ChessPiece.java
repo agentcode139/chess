@@ -1,8 +1,8 @@
 package chess;
 
-import java.util.ArrayList;
+import chess.movecalculator.*;
+
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Represents a single chess piece
@@ -56,46 +56,12 @@ public class ChessPiece {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         ChessPiece piece = board.getPiece(myPosition);
         return switch (piece.getPieceType()) {
-            case PieceType.BISHOP ->
-                    List.of(new ChessMove(myPosition, new ChessPosition(1, 8), null));
-            case PieceType.KING -> List.of();
-            case PieceType.KNIGHT -> List.of();
-            case PieceType.PAWN -> List.of();
-            case PieceType.QUEEN -> List.of();
-            case PieceType.ROOK -> List.of();// validRookMoves(piece, myPosition);
+            case PieceType.BISHOP -> new BishopMoveCalculator().pieceMoves(board, myPosition);
+            case PieceType.KING -> new KingMoveCalculator().pieceMoves(board, myPosition);
+            case PieceType.KNIGHT -> new KnightMoveCalculator().pieceMoves(board, myPosition);
+            case PieceType.PAWN -> new PawnMoveCalculator().pieceMoves(board, myPosition);
+            case PieceType.QUEEN -> new QueenMoveCalculator().pieceMoves(board, myPosition);
+            case PieceType.ROOK -> new RookMoveCalculator().pieceMoves(board, myPosition);
         };
-    }
-
-    // to memory heavy
-    private Collection<ChessMove> validRookMoves(ChessPiece piece, ChessPosition position){
-        //init
-        List<ChessMove> moves = new ArrayList<ChessMove>();
-        int i;
-        // UP
-        i = 1;
-        while (position.getColumn() + i < 9){
-            moves.add(new ChessMove(position, new ChessPosition(position.getRow(), position.getColumn()+i), null));
-            i++;
-        }
-        // DOWN
-        i = 1;
-        while (position.getColumn() - i > 0){
-            moves.add(new ChessMove(position, new ChessPosition(position.getRow(), position.getColumn()-i), null));
-            i--;
-        }
-        // LEFT
-        i = 1;
-        while (position.getRow() - i > 0){
-            moves.add(new ChessMove(position, new ChessPosition(position.getRow()-i, position.getColumn()), null));
-            i--;
-        }
-        // RIGHT
-        i = 1;
-        while (position.getRow() + i < 9){
-            moves.add(new ChessMove(position, new ChessPosition(position.getRow()+i, position.getColumn()), null));
-            i++;
-        }
-
-        return moves;
     }
 }
