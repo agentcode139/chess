@@ -10,7 +10,6 @@ import static java.lang.Math.pow;
 
 public class PawnMoveCalculator implements ChessMoveCalculator {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position){
-        //TODO implement Pawn movement (needs direction)
         if (position.getRow()+1 > 8 || position.getRow()-1 < 1){
             return new HashSet<>();
         }
