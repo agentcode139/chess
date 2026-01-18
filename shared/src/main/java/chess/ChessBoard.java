@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -42,11 +43,27 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        //TODO Finish resetBoard()
-        gameboard = new ChessPiece[8][8];
+        // TODO Finish resetBoard()
+        //gameboard = new ChessPiece[8][8];
+        for (int i = 0; i < 8; i++){
+            for (int j = 0; j <8; j++){
+                this.gameboard[i][j] = null;
+            }
+        }
         // Pawns
+        ChessPiece.PieceType[] pieceOrder = {
+                ChessPiece.PieceType.ROOK, ChessPiece.PieceType.KNIGHT,
+                ChessPiece.PieceType.BISHOP, ChessPiece.PieceType.QUEEN,
+                ChessPiece.PieceType.KING, ChessPiece.PieceType.PAWN,
+                ChessPiece.PieceType.KNIGHT, ChessPiece.PieceType.ROOK,
+        };
         for (int i = 1; i <= 8; i++){
+            // White
+            this.addPiece(new ChessPosition(1,i), new ChessPiece(ChessGame.TeamColor.WHITE, pieceOrder[i-1]));
             this.addPiece(new ChessPosition(2,i), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
+
+            // Black
+            this.addPiece(new ChessPosition(8,i), new ChessPiece(ChessGame.TeamColor.BLACK, pieceOrder[i-1]));
             this.addPiece(new ChessPosition(7,i), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
         }
     }
