@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class BishopMoveCalculator implements ChessMoveCalculator {
-    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position){
+    public Collection<ChessMove> moveCalculator(ChessBoard board, ChessPosition position){
         Set<ChessMove> validMoves = new HashSet<>();
         //UPRIGHT
         for (int i = 1; i<9; i++) {

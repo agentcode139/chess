@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class KingMoveCalculator implements ChessMoveCalculator {
-    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position){
+    public Collection<ChessMove> moveCalculator(ChessBoard board, ChessPosition position){
         Set<ChessMove> validMoves = new HashSet<>();
         //UP
         // Check if move is out of bounds

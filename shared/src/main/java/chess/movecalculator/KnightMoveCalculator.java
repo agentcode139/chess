@@ -12,7 +12,7 @@ import java.util.Set;
 import static java.lang.Math.pow;
 
 public class KnightMoveCalculator implements ChessMoveCalculator {
-    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position){
+    public Collection<ChessMove> moveCalculator(ChessBoard board, ChessPosition position){
         Set<ChessMove> validMoves = new HashSet<>();
         //UP
         for (int d = 0; d < 2; d++){
