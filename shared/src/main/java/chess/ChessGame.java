@@ -1,7 +1,6 @@
 package chess;
 
-import java.util.Collection;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -13,13 +12,15 @@ public class ChessGame {
 
     ChessBoard chessBoard;
     TeamColor teamTurn;
+    List<ChessGameMove> gameHistory;
 
     public ChessGame() {
         // Turn Logic
         this.teamTurn = TeamColor.WHITE;
+        this.gameHistory = new LinkedList<>();
         // Board Setup
         this.chessBoard = new ChessBoard();
-        chessBoard.resetBoard();
+        this.chessBoard.resetBoard();
     }
 
     /**
@@ -39,6 +40,43 @@ public class ChessGame {
     }
 
     /**
+     * Find the position of a team's king on the board
+     *
+     * @param team of team to check for
+     * @return ChessPosition of king of the team
+     */
+    private Collection<ChessPosition> getTeamPositions(TeamColor team){
+        Set<ChessPosition> pieceSpots = new HashSet<>();
+        for (int i = 1; i <= 8; i++){
+            for (int j = 1; j <= 8; j++){
+                ChessPosition spot = new ChessPosition(i,j);
+                if (this.chessBoard.getPiece(spot).getTeamColor() == team){
+                    pieceSpots.add(spot);
+                }
+            }
+        }
+        return pieceSpots;
+    }
+
+    /**
+     * Find the position of a team's king on the board
+     *
+     * @param teamColor of team to check for
+     * @return ChessPosition of king of the team
+     */
+    private ChessPosition kingPosition(TeamColor teamColor){
+        for (int i = 1; i <= 8; i++){
+            for (int j = 1; j <= 8; j++){
+                ChessPosition spot = new ChessPosition(i,j);
+                if (this.chessBoard.getPiece(spot).getPieceType() == ChessPiece.PieceType.KING && this.chessBoard.getPiece(spot).getTeamColor() == teamColor){
+                    return spot;
+                }
+            }
+        }
+        return null; // or throw error about no king?
+    }
+
+    /**
      * Enum identifying the 2 possible teams in a chess game
      */
     public enum TeamColor {
@@ -54,7 +92,46 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        /* all possible moves from piece */
+        Collection<ChessMove> moves = this.chessBoard.getPiece(startPosition).pieceMoves(this.chessBoard,startPosition);
+        moves.addAll(validSpecialMoves(startPosition));
+        /* Find all moves the cause check for team */
+        Collection<ChessMove> putsInCheck = new HashSet<>();
+        TeamColor teamColor = this.chessBoard.getPiece(startPosition).getTeamColor();
+        //TODO: fix for each loop
+        for (ChessMove move : moves){
+            /* Init Check game */
+            ChessGame checkGame = new ChessGame();
+            checkGame.setBoard(chessBoard); //TODO: Make propper copy of chessBoard
+            checkGame.setTeamTurn(teamColor);
+            try {
+                checkGame.makeMove(move);
+            } catch (InvalidMoveException ignored) {
+                putsInCheck.add(move); //Needs to be removed
+            }
+            if (checkGame.isInCheck(teamColor)){
+                putsInCheck.add(move);
+                //Optimization idea just remove from moves instead of adding to another set
+            }
+        }
+        /* Remove moves that put team in check */
+        moves.removeAll(putsInCheck);
+
+        return moves;
+    }
+
+    /**
+     * Gets a valid special moves for a piece at the given location
+     * Special moves are En passant and Castling
+     *
+     * @param startPosition
+     * @return Set of valid special moves for requested piece, or null if no piece at startPosition
+     */
+    private Collection<ChessMove> validSpecialMoves(ChessPosition startPosition){
+        // En passant: check latest move in log
+        // Castling: check for any movement from king and rook
+        //TODO: remove testing empty set
+        return new HashSet<>();
     }
 
     /**
@@ -64,7 +141,18 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        if (!validMoves(move.getStartPosition()).contains(move)){
+            throw new InvalidMoveException("Move is invalid");
+        } else {
+            //TODO: if move is special special update else
+            if (validSpecialMoves(move.getStartPosition()).contains(move)){
+                //special action
+            } else {
+                //update
+            }
+            throw new RuntimeException("Not implemented");
+        }
+
     }
 
     /**
@@ -74,7 +162,20 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        Set<ChessMove> validEnemyMoves = new HashSet<>();
+        for (int i = 1; i <= 8; i++){
+            for (int j = 1; j <= 8; j++){
+                ChessPosition spot = new ChessPosition(i,j);
+                if (chessBoard.getPiece(spot).getTeamColor() != teamColor){
+                    validEnemyMoves.addAll(chessBoard.getPiece(spot).pieceMoves(chessBoard,spot));
+                }
+            }
+        }
+        Set<ChessPosition> validEnemyMoveEndSpots = new HashSet<>();
+        for(ChessMove move: validEnemyMoves){
+            validEnemyMoveEndSpots.add(move.getEndPosition());
+        }
+        return validEnemyMoveEndSpots.contains(kingPosition(teamColor));
     }
 
     /**
@@ -84,7 +185,7 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        return isInCheck(teamColor) && validMoves(kingPosition(teamColor)).isEmpty();
     }
 
     /**
@@ -95,7 +196,11 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        Collection<ChessMove> validTeamMoves = new HashSet<>();
+        for (ChessPosition piecePosition : getTeamPositions(teamColor)){
+            validTeamMoves.addAll(validMoves(piecePosition));
+        }
+        return validTeamMoves.isEmpty();
     }
 
     /**
