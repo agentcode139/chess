@@ -44,11 +44,6 @@ public class ChessBoard {
     public void resetBoard() {
         // Blank
         this.gameboard = new ChessPiece[8][8]; //Blank
-//        for (int i = 0; i < 8; i++){
-//            for (int j = 0; j <8; j++){
-//                this.gameboard[i][j] = null;
-//            }
-//        }
         // Pawns
         ChessPiece.PieceType[] pieceOrder = {
                 ChessPiece.PieceType.ROOK, ChessPiece.PieceType.KNIGHT,
