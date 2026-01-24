@@ -68,7 +68,7 @@ public class ChessGame {
         for (int i = 1; i <= 8; i++){
             for (int j = 1; j <= 8; j++){
                 ChessPosition spot = new ChessPosition(i,j);
-                if (this.chessBoard.getPiece(spot).getPieceType() == ChessPiece.PieceType.KING && this.chessBoard.getPiece(spot).getTeamColor() == teamColor){
+                if (this.chessBoard.getPiece(spot) != null && this.chessBoard.getPiece(spot).getPieceType() == ChessPiece.PieceType.KING && this.chessBoard.getPiece(spot).getTeamColor() == teamColor){
                     return spot;
                 }
             }
@@ -104,11 +104,11 @@ public class ChessGame {
             ChessGame checkGame = new ChessGame();
             checkGame.setBoard(chessBoard); //TODO: Make propper copy of chessBoard
             checkGame.setTeamTurn(teamColor);
-            try {
-                checkGame.makeMove(move);
-            } catch (InvalidMoveException ignored) {
-                putsInCheck.add(move); //Needs to be removed
-            }
+//            try {
+//                checkGame.makeMove(move);
+//            } catch (InvalidMoveException ignored) {
+//                putsInCheck.add(move); //Needs to be removed
+//            }
             if (checkGame.isInCheck(teamColor)){
                 putsInCheck.add(move);
                 //Optimization idea just remove from moves instead of adding to another set
@@ -145,12 +145,14 @@ public class ChessGame {
             throw new InvalidMoveException("Move is invalid");
         } else {
             //TODO: if move is special special update else
-            if (validSpecialMoves(move.getStartPosition()).contains(move)){
+            if (false && validSpecialMoves(move.getStartPosition()).contains(move)){
                 //special action
             } else {
                 //update
+                ChessPiece pieceMoved = chessBoard.getPiece(move.getStartPosition());
+                chessBoard.addPiece(move.getEndPosition(),pieceMoved);
+                chessBoard.addPiece(move.getStartPosition(),null);
             }
-            throw new RuntimeException("Not implemented");
         }
 
     }
@@ -166,7 +168,7 @@ public class ChessGame {
         for (int i = 1; i <= 8; i++){
             for (int j = 1; j <= 8; j++){
                 ChessPosition spot = new ChessPosition(i,j);
-                if (chessBoard.getPiece(spot).getTeamColor() != teamColor){
+                if (chessBoard.getPiece(spot) != null && chessBoard.getPiece(spot).getTeamColor() != teamColor){
                     validEnemyMoves.addAll(chessBoard.getPiece(spot).pieceMoves(chessBoard,spot));
                 }
             }
