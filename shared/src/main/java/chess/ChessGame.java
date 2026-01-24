@@ -98,20 +98,19 @@ public class ChessGame {
         /* Find all moves the cause check for team */
         Collection<ChessMove> putsInCheck = new HashSet<>();
         TeamColor teamColor = this.chessBoard.getPiece(startPosition).getTeamColor();
-        //TODO: fix for each loop
         for (ChessMove move : moves){
             /* Init Check game */
             ChessGame checkGame = new ChessGame();
             checkGame.setBoard(chessBoard); //TODO: Make propper copy of chessBoard
             checkGame.setTeamTurn(teamColor);
-//            try {
-//                checkGame.makeMove(move);
-//            } catch (InvalidMoveException ignored) {
-//                putsInCheck.add(move); //Needs to be removed
-//            }
+            //TODO fix try block
+            try {
+                checkGame.makeMove(move);
+            } catch (InvalidMoveException ignored) {
+                putsInCheck.add(move); //Needs to be removed
+            }
             if (checkGame.isInCheck(teamColor)){
                 putsInCheck.add(move);
-                //Optimization idea just remove from moves instead of adding to another set
             }
         }
         /* Remove moves that put team in check */
@@ -141,20 +140,28 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        if (!validMoves(move.getStartPosition()).contains(move)){
-            throw new InvalidMoveException("Move is invalid");
+        //TODO: if move is special special update else
+        if (false && validSpecialMoves(move.getStartPosition()).contains(move)) {
+            //special action
         } else {
-            //TODO: if move is special special update else
-            if (false && validSpecialMoves(move.getStartPosition()).contains(move)){
-                //special action
+            //update
+            ChessPiece pieceMoved = chessBoard.getPiece(move.getStartPosition());
+            if (pieceMoved != null && pieceMoved.pieceMoves(chessBoard, move.getStartPosition()).contains(move)) {
+                /* Move */
+                chessBoard.addPiece(move.getEndPosition(), pieceMoved);
+                chessBoard.addPiece(move.getStartPosition(), null);
+                setTeamTurn(getTeamTurn() == TeamColor.WHITE ? TeamColor.BLACK:TeamColor.WHITE);
             } else {
-                //update
-                ChessPiece pieceMoved = chessBoard.getPiece(move.getStartPosition());
-                chessBoard.addPiece(move.getEndPosition(),pieceMoved);
-                chessBoard.addPiece(move.getStartPosition(),null);
+                throw new InvalidMoveException("Move is invalid");
             }
         }
 
+    }
+
+    private void sudoMakeMove(ChessMove move){
+        ChessPiece pieceMoved = chessBoard.getPiece(move.getStartPosition());
+        chessBoard.addPiece(move.getEndPosition(),pieceMoved);
+        chessBoard.addPiece(move.getStartPosition(),null);
     }
 
     /**
