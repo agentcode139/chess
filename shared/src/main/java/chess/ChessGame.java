@@ -151,7 +151,11 @@ public class ChessGame {
             //update
             if (pieceMoved != null && pieceMoved.pieceMoves(chessBoard, move.getStartPosition()).contains(move)) {
                 /* Move */
-                chessBoard.addPiece(move.getEndPosition(), pieceMoved);
+                if ((pieceMoved.getPieceType() == ChessPiece.PieceType.PAWN && move.getPromotionPiece() != null)) {
+                    chessBoard.addPiece(move.getEndPosition(), new ChessPiece(pieceMoved.getTeamColor(), move.getPromotionPiece()));
+                } else {
+                    chessBoard.addPiece(move.getEndPosition(), pieceMoved);
+                }
                 chessBoard.addPiece(move.getStartPosition(), null);
                 setTeamTurn(getTeamTurn() == TeamColor.WHITE ? TeamColor.BLACK:TeamColor.WHITE);
             } else {
