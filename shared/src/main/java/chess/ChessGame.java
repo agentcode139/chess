@@ -141,11 +141,14 @@ public class ChessGame {
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
         //TODO: if move is special special update else
+        ChessPiece pieceMoved = chessBoard.getPiece(move.getStartPosition());
+        if (pieceMoved != null && pieceMoved.getTeamColor() != this.teamTurn){
+            throw new InvalidMoveException("Move is out of turn");
+        }
         if (false && validSpecialMoves(move.getStartPosition()).contains(move)) {
             //special action
         } else {
             //update
-            ChessPiece pieceMoved = chessBoard.getPiece(move.getStartPosition());
             if (pieceMoved != null && pieceMoved.pieceMoves(chessBoard, move.getStartPosition()).contains(move)) {
                 /* Move */
                 chessBoard.addPiece(move.getEndPosition(), pieceMoved);
