@@ -11,9 +11,20 @@ import java.util.Objects;
  */
 public class ChessBoard {
 
-    ChessPiece[][] gameboard = new ChessPiece[8][8]; //Valid spots range: {0 < i,j <= 8}
+    ChessPiece[][] gameboard;
 
     public ChessBoard() {
+        this.gameboard = new ChessPiece[8][8]; //Valid spots range: {0 < i,j <= 8}
+    }
+
+    public ChessBoard(ChessBoard board){
+        this.gameboard = new ChessPiece[8][8];
+        for (int i = 1; i <= 8; i++){
+            for (int j = 1; j <= 8; j++){
+                this.gameboard[i-1][j-1] = board.getPiece(new ChessPosition(i,j));
+            }
+        }
+
     }
 
     /**

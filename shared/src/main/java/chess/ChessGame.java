@@ -101,13 +101,12 @@ public class ChessGame {
         for (ChessMove move : moves){
             /* Init Check game */
             ChessGame checkGame = new ChessGame();
-            checkGame.setBoard(chessBoard); //TODO: Make propper copy of chessBoard
+            checkGame.setBoard(new ChessBoard(chessBoard));
             checkGame.setTeamTurn(teamColor);
-            //TODO fix try block
             try {
                 checkGame.makeMove(move);
             } catch (InvalidMoveException ignored) {
-                putsInCheck.add(move); //Needs to be removed
+                putsInCheck.add(move);
             }
             if (checkGame.isInCheck(teamColor)){
                 putsInCheck.add(move);
@@ -145,8 +144,28 @@ public class ChessGame {
         if (pieceMoved != null && pieceMoved.getTeamColor() != this.teamTurn){
             throw new InvalidMoveException("Move is out of turn");
         }
+
         if (false && validSpecialMoves(move.getStartPosition()).contains(move)) {
             //special action
+            if (pieceMoved.getPieceType() == ChessPiece.PieceType.PAWN){
+                // En passant: check latest move in log
+                if (gameHistory.getLast() != null && gameHistory.getLast().piece().getPieceType() == ChessPiece.PieceType.PAWN
+                        && Math.abs(gameHistory.getLast().move().getEndPosition().getRow()-gameHistory.getLast().move().getStartPosition().getRow()) > 1
+                        && (gameHistory.getLast().move().getEndPosition().getColumn() == move.getStartPosition().getColumn())){
+
+                }
+            } else {
+                // Castling: check for any movement from king and rook
+            }
+
+            if (isInCheck(pieceMoved.getTeamColor())){
+                // undo
+                chessBoard.addPiece(move.getStartPosition(), pieceMoved);
+                chessBoard.addPiece(move.getEndPosition(), null);
+                // Error
+                throw new InvalidMoveException("Move is invalid");
+            }
+
         } else {
             //update
             if (pieceMoved != null && pieceMoved.pieceMoves(chessBoard, move.getStartPosition()).contains(move)) {
@@ -158,17 +177,20 @@ public class ChessGame {
                 }
                 chessBoard.addPiece(move.getStartPosition(), null);
                 setTeamTurn(getTeamTurn() == TeamColor.WHITE ? TeamColor.BLACK:TeamColor.WHITE);
+                gameHistory.addLast(new ChessGameMove(pieceMoved,move));
+
+                if (isInCheck(pieceMoved.getTeamColor())){
+                    // undo
+                    chessBoard.addPiece(move.getStartPosition(), pieceMoved);
+                    chessBoard.addPiece(move.getEndPosition(), null);
+                    // Error
+                    throw new InvalidMoveException("Move is invalid");
+                }
             } else {
                 throw new InvalidMoveException("Move is invalid");
             }
         }
 
-    }
-
-    private void sudoMakeMove(ChessMove move){
-        ChessPiece pieceMoved = chessBoard.getPiece(move.getStartPosition());
-        chessBoard.addPiece(move.getEndPosition(),pieceMoved);
-        chessBoard.addPiece(move.getStartPosition(),null);
     }
 
     /**
