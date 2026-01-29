@@ -129,6 +129,21 @@ public class ChessGame {
         // En passant: check latest move in log
         // Castling: check for any movement from king and rook
         //TODO: remove testing empty set
+        ChessPiece pieceMoved = chessBoard.getPiece(startPosition);
+
+        if (pieceMoved.getPieceType() == ChessPiece.PieceType.PAWN){
+            // En passant: check latest move in log
+//            if (gameHistory.getLast() != null && gameHistory.getLast().piece().getPieceType() == ChessPiece.PieceType.PAWN
+//                    && Math.abs(gameHistory.getLast().move().getEndPosition().getRow() - gameHistory.getLast().move().getStartPosition().getRow()) > 1
+//                    && (gameHistory.getLast().move().getEndPosition().getColumn() == startPosition.getColumn())){
+
+//            }
+        } else {
+            // Castling: check for any movement from king and rook
+        }
+
+
+
         return new HashSet<>();
     }
 
@@ -149,13 +164,20 @@ public class ChessGame {
             //special action
             if (pieceMoved.getPieceType() == ChessPiece.PieceType.PAWN){
                 // En passant: check latest move in log
-                if (gameHistory.getLast() != null && gameHistory.getLast().piece().getPieceType() == ChessPiece.PieceType.PAWN
-                        && Math.abs(gameHistory.getLast().move().getEndPosition().getRow()-gameHistory.getLast().move().getStartPosition().getRow()) > 1
-                        && (gameHistory.getLast().move().getEndPosition().getColumn() == move.getStartPosition().getColumn())){
+                // Move piece
 
-                }
+                // Remove Captured
+
+                // Check
+
             } else {
                 // Castling: check for any movement from king and rook
+                // Move King
+
+                // Move Rook
+
+                // Check
+
             }
 
             if (isInCheck(pieceMoved.getTeamColor())){
@@ -177,7 +199,7 @@ public class ChessGame {
                 }
                 chessBoard.addPiece(move.getStartPosition(), null);
                 setTeamTurn(getTeamTurn() == TeamColor.WHITE ? TeamColor.BLACK:TeamColor.WHITE);
-                gameHistory.addLast(new ChessGameMove(pieceMoved,move));
+//                gameHistory.addLast(new ChessGameMove(pieceMoved,move));
 
                 if (isInCheck(pieceMoved.getTeamColor())){
                     // undo
