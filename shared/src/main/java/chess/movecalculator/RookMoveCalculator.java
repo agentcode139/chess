@@ -61,5 +61,4 @@ public class RookMoveCalculator implements ChessMoveCalculator {
         }
         return moves;
     }
-
 }
