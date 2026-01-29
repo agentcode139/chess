@@ -27,6 +27,21 @@ public class ChessBoard {
 
     }
 
+    // TODO: Implement deepcopy clone
+    @Override
+    public ChessBoard clone(){
+        try {
+            ChessBoard clone = (ChessBoard) super.clone();
+
+            ChessPiece[][] cloneGameboard = gameboard.clone();
+            clone.gameboard = cloneGameboard;
+
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     /**
      * Adds a chess piece to the chessboard
      *
