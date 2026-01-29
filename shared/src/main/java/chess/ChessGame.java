@@ -50,7 +50,7 @@ public class ChessGame {
         for (int i = 1; i <= 8; i++){
             for (int j = 1; j <= 8; j++){
                 ChessPosition spot = new ChessPosition(i,j);
-                if (this.chessBoard.getPiece(spot).getTeamColor() == team){
+                if (this.chessBoard.getPiece(spot) != null && this.chessBoard.getPiece(spot).getTeamColor() == team){
                     pieceSpots.add(spot);
                 }
             }
@@ -122,7 +122,7 @@ public class ChessGame {
      * Gets a valid special moves for a piece at the given location
      * Special moves are En passant and Castling
      *
-     * @param startPosition
+     * @param startPosition the position where the piece is at.
      * @return Set of valid special moves for requested piece, or null if no piece at startPosition
      */
     private Collection<ChessMove> validSpecialMoves(ChessPosition startPosition){
@@ -245,7 +245,12 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        return isInCheck(teamColor) && validMoves(kingPosition(teamColor)).isEmpty();
+        Collection<ChessMove> validTeamMoves = new HashSet<>();
+        Collection<ChessPosition> teamSpots = getTeamPositions(teamColor);
+        for (ChessPosition spot : teamSpots) {
+            validTeamMoves.addAll(validMoves(spot));
+        }
+        return isInCheck(teamColor) && validTeamMoves.isEmpty();
     }
 
     /**
@@ -260,7 +265,7 @@ public class ChessGame {
         for (ChessPosition piecePosition : getTeamPositions(teamColor)){
             validTeamMoves.addAll(validMoves(piecePosition));
         }
-        return validTeamMoves.isEmpty();
+        return validTeamMoves.isEmpty() && !isInCheckmate(teamColor);
     }
 
     /**
