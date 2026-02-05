@@ -33,8 +33,7 @@ public class ChessBoard {
         try {
             ChessBoard clone = (ChessBoard) super.clone();
 
-            ChessPiece[][] cloneGameboard = gameboard.clone();
-            clone.gameboard = cloneGameboard;
+            clone.gameboard = gameboard.clone();
 
             return clone;
         } catch (CloneNotSupportedException e) {

@@ -9,15 +9,22 @@ import java.util.*;
  * signature of the existing methods.
  */
 public class ChessGame {
-
+    /* Data */
     ChessBoard chessBoard;
+    /* Status Variables */
     TeamColor teamTurn;
-    List<ChessGameMove> gameHistory;
+    //List<ChessGameMove> gameHistory;
+    ChessGameMove priorMove;
+    Map<ChessPosition, Boolean> hasMoved;
 
     public ChessGame() {
         // Turn Logic
         this.teamTurn = TeamColor.WHITE;
-        this.gameHistory = new LinkedList<>();
+        this.priorMove = null;
+        // TODO: init this.hasMoved to false for all pieces (Rooks and kings)
+        this.hasMoved = new HashMap<>();
+        // hasMoved[new ChessPosition(1,1)] = new Boolean(false); // Broken
+
         // Board Setup
         this.chessBoard = new ChessBoard();
         this.chessBoard.resetBoard();
@@ -68,7 +75,9 @@ public class ChessGame {
         for (int i = 1; i <= 8; i++){
             for (int j = 1; j <= 8; j++){
                 ChessPosition spot = new ChessPosition(i,j);
-                if (this.chessBoard.getPiece(spot) != null && this.chessBoard.getPiece(spot).getPieceType() == ChessPiece.PieceType.KING && this.chessBoard.getPiece(spot).getTeamColor() == teamColor){
+                if (this.chessBoard.getPiece(spot) != null
+                        && this.chessBoard.getPiece(spot).getPieceType() == ChessPiece.PieceType.KING
+                        && this.chessBoard.getPiece(spot).getTeamColor() == teamColor){
                     return spot;
                 }
             }
@@ -92,12 +101,25 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
+        TeamColor teamColor = this.chessBoard.getPiece(startPosition).getTeamColor();
         /* all possible moves from piece */
         Collection<ChessMove> moves = this.chessBoard.getPiece(startPosition).pieceMoves(this.chessBoard,startPosition);
-        moves.addAll(validSpecialMoves(startPosition));
+        // Castling
+        if (startPosition.equals(new ChessPosition(1, 4))) {
+            moves.add(new ChessMove(startPosition, new ChessPosition(1, 6), null)); //TODO: Add all special moves
+            moves.add(new ChessMove(startPosition, new ChessPosition(1, 3), null)); //TODO: Add all special moves
+        } else if (startPosition.equals(new ChessPosition(8, 4))){
+            moves.add(new ChessMove(startPosition, new ChessPosition(8, 6), null)); //TODO: Add all special moves
+            moves.add(new ChessMove(startPosition, new ChessPosition(8, 3), null)); //TODO: Add all special moves
+        }
+        // En Passant REALLY HARD
+//        if (priorMove != null && priorMove.piece().getPieceType() == ChessPiece.PieceType.PAWN){
+//
+//        }
+
         /* Find all moves the cause check for team */
         Collection<ChessMove> putsInCheck = new HashSet<>();
-        TeamColor teamColor = this.chessBoard.getPiece(startPosition).getTeamColor();
+
         for (ChessMove move : moves){
             /* Init Check game */
             ChessGame checkGame = new ChessGame();
@@ -105,10 +127,10 @@ public class ChessGame {
             checkGame.setTeamTurn(teamColor);
             try {
                 checkGame.makeMove(move);
+                if (checkGame.isInCheck(teamColor)){
+                    putsInCheck.add(move);
+                }
             } catch (InvalidMoveException ignored) {
-                putsInCheck.add(move);
-            }
-            if (checkGame.isInCheck(teamColor)){
                 putsInCheck.add(move);
             }
         }
@@ -119,76 +141,78 @@ public class ChessGame {
     }
 
     /**
-     * Gets a valid special moves for a piece at the given location
-     * Special moves are En passant and Castling
-     *
-     * @param startPosition the position where the piece is at.
-     * @return Set of valid special moves for requested piece, or null if no piece at startPosition
-     */
-    private Collection<ChessMove> validSpecialMoves(ChessPosition startPosition){
-        // En passant: check latest move in log
-        // Castling: check for any movement from king and rook
-        //TODO: remove testing empty set
-        ChessPiece pieceMoved = chessBoard.getPiece(startPosition);
-
-        if (pieceMoved.getPieceType() == ChessPiece.PieceType.PAWN){
-            // En passant: check latest move in log
-//            if (gameHistory.getLast() != null && gameHistory.getLast().piece().getPieceType() == ChessPiece.PieceType.PAWN
-//                    && Math.abs(gameHistory.getLast().move().getEndPosition().getRow() - gameHistory.getLast().move().getStartPosition().getRow()) > 1
-//                    && (gameHistory.getLast().move().getEndPosition().getColumn() == startPosition.getColumn())){
-
-//            }
-        } else {
-            // Castling: check for any movement from king and rook
-        }
-
-
-
-        return new HashSet<>();
-    }
-
-    /**
      * Makes a move in a chess game
      *
      * @param move chess move to perform
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        //TODO: if move is special special update else
         ChessPiece pieceMoved = chessBoard.getPiece(move.getStartPosition());
         if (pieceMoved != null && pieceMoved.getTeamColor() != this.teamTurn){
             throw new InvalidMoveException("Move is out of turn");
         }
-
-        if (false && validSpecialMoves(move.getStartPosition()).contains(move)) {
+        // TODO: if move is special special update else
+        if (pieceMoved != null && !pieceMoved.pieceMoves(this.chessBoard,move.getStartPosition()).contains(move)) { /*SPECIAL MOVES*/
             //special action
-            if (pieceMoved.getPieceType() == ChessPiece.PieceType.PAWN){
-                // En passant: check latest move in log
-                // Move piece
-
-                // Remove Captured
-
-                // Check
-
-            } else {
-                // Castling: check for any movement from king and rook
+//            if (priorMove != null && priorMove.piece().getPieceType() == ChessPiece.PieceType.PAWN
+//                    && pieceMoved.getPieceType() == ChessPiece.PieceType.PAWN){
+//                // En passant:
+//                // Move piece
+//
+//                // Remove Captured
+//
+//                // Check
+//                if (isInCheck(pieceMoved.getTeamColor())){
+//                    // undo
+//                    chessBoard.addPiece(move.getStartPosition(), pieceMoved);
+//                    chessBoard.addPiece(move.getEndPosition(), null);
+//                    // Error
+//                    throw new InvalidMoveException("Move is invalid");
+//                }
+//            } else {
+                // Castling:
+                // Check for any movement from king and rook
+                ChessPosition rookToMovePosition = new ChessPosition(move.getStartPosition().getRow(),move.getEndPosition().getColumn()<4? 1:8);
+                if (hasMoved.get(move.getStartPosition()) == true || hasMoved.get(rookToMovePosition) == true){
+                    throw new InvalidMoveException("Move is invalid");
+                }
+                // Check if space is empty
+                if (move.getEndPosition().getColumn()<4){
+                    // Check left
+                    for (int i = 2; i<4; i++) { //TODO: set correct spots to check
+                        if (chessBoard.getPiece(new ChessPosition(move.getStartPosition().getRow(), i)) != null) {
+                            throw new InvalidMoveException("Move is invalid");
+                        }
+                    }
+                } else {
+                    // Check right
+                    for (int i = 6; i<8; i++) { //TODO: set correct spots to check
+                        if (chessBoard.getPiece(new ChessPosition(move.getStartPosition().getRow(), i)) != null) {
+                            throw new InvalidMoveException("Move is invalid");
+                        }
+                    }
+                }
                 // Move King
-
+                chessBoard.addPiece(move.getEndPosition(), pieceMoved);
+                chessBoard.addPiece(move.getStartPosition(), null);
                 // Move Rook
-
+                ChessPiece rookMoved = chessBoard.getPiece(rookToMovePosition);
+                chessBoard.addPiece(move.getEndPosition(), rookMoved);
+                chessBoard.addPiece(rookToMovePosition, null);
                 // Check
+                if (isInCheck(pieceMoved.getTeamColor())){
+                    // undo
+                    chessBoard.addPiece(move.getStartPosition(), pieceMoved);
+                    chessBoard.addPiece(move.getEndPosition(), null);
+                    chessBoard.addPiece(rookToMovePosition, rookMoved);
+                    chessBoard.addPiece(move.getEndPosition(), null);
+                    // Error
+                    throw new InvalidMoveException("Move is invalid");
+                }
+//            }
 
-            }
 
-            if (isInCheck(pieceMoved.getTeamColor())){
-                // undo
-                chessBoard.addPiece(move.getStartPosition(), pieceMoved);
-                chessBoard.addPiece(move.getEndPosition(), null);
-                // Error
-                throw new InvalidMoveException("Move is invalid");
-            }
-
-        } else {
+        } else { /*NORMAL MOVES*/
             //update
             if (pieceMoved != null && pieceMoved.pieceMoves(chessBoard, move.getStartPosition()).contains(move)) {
                 /* Move */
@@ -198,8 +222,6 @@ public class ChessGame {
                     chessBoard.addPiece(move.getEndPosition(), pieceMoved);
                 }
                 chessBoard.addPiece(move.getStartPosition(), null);
-                setTeamTurn(getTeamTurn() == TeamColor.WHITE ? TeamColor.BLACK:TeamColor.WHITE);
-//                gameHistory.addLast(new ChessGameMove(pieceMoved,move));
 
                 if (isInCheck(pieceMoved.getTeamColor())){
                     // undo
@@ -212,6 +234,9 @@ public class ChessGame {
                 throw new InvalidMoveException("Move is invalid");
             }
         }
+        // Status update
+        setTeamTurn(getTeamTurn() == TeamColor.WHITE ? TeamColor.BLACK:TeamColor.WHITE);
+        this.priorMove = new ChessGameMove(pieceMoved,move);
 
     }
 
