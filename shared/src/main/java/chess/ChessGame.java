@@ -13,9 +13,6 @@ public class ChessGame {
     ChessBoard chessBoard;
     /* Status Variables */
     TeamColor teamTurn;
-    //List<ChessGameMove> gameHistory;
-    ChessGameMove priorMove;
-    Map<ChessPosition, Boolean> hasMoved;
 
     public ChessGame() {
         // Turn Logic
@@ -158,8 +155,6 @@ public class ChessGame {
 
         // Status update
         setTeamTurn(getTeamTurn() == TeamColor.WHITE ? TeamColor.BLACK:TeamColor.WHITE);
-        this.priorMove = new ChessGameMove(pieceMoved,move);
-
     }
 
     /**
