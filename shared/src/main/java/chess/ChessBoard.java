@@ -16,7 +16,7 @@ public class ChessBoard {
     public ChessBoard() {
         this.gameboard = new ChessPiece[8][8]; //Valid spots range: {0 < i,j <= 8}
     }
-
+    // C++ clone technique
     public ChessBoard(ChessBoard board){
         this.gameboard = new ChessPiece[8][8];
         for (int i = 1; i <= 8; i++){
@@ -27,7 +27,6 @@ public class ChessBoard {
 
     }
 
-    // TODO: Implement deepcopy clone
     @Override
     public ChessBoard clone(){
         try {
