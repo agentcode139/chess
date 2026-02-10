@@ -9,17 +9,20 @@ import java.util.HashSet;
 import java.util.Set;
 
 public interface LinearMoveCalculator {
-    Collection<ChessMove> validMovesOnLine(ChessBoard board, ChessPosition startPosition, int rowIteration, int colIteration);
+    Collection<ChessMove> validMovesOnLine(ChessBoard board, ChessPosition startPosition, int rowIteration, int colIteration, int distanceChecked);
 }
 
 class LineMoveCalculator implements LinearMoveCalculator {
     private boolean inBounds(int row, int col){
         return (row < 9) && (row > 0) && (col < 9) && (col > 0);
     }
-    @Override
-    public Collection<ChessMove> validMovesOnLine(ChessBoard board, ChessPosition startPosition, int rowIteration, int colIteration) {
+
+    public Collection<ChessMove> validMovesOnLine(ChessBoard board, ChessPosition startPosition, int rowIteration, int colIteration, int distanceChecked) {
         Set<ChessMove> moves = new HashSet<>();
-        for (int i = 1; i<9; i++) {
+        if (distanceChecked > 8) {
+            distanceChecked = 8; // Max distance
+        }
+        for (int i = 1; i<=distanceChecked; i++) {
             // Check if move is out of bounds
             if (!inBounds(startPosition.getRow()+(i*rowIteration), startPosition.getColumn()+(i*colIteration))) {
                 break;

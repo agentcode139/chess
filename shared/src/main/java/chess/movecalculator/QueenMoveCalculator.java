@@ -53,7 +53,7 @@ public class QueenMoveCalculator implements ChessMoveCalculator {
                     yield 0;
                 }
             };
-            validMoves.addAll(new LineMoveCalculator().validMovesOnLine(board,position,r,c));
+            validMoves.addAll(new LineMoveCalculator().validMovesOnLine(board,position,r,c, 8));
         }
         return validMoves;
     }

@@ -10,10 +10,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class KingMoveCalculator implements ChessMoveCalculator {
-    private boolean inBounds(int row, int col){
-        return (row < 9) && (row > 0) && (col < 9) && (col > 0);
-    }
-
     public Collection<ChessMove> moveCalculator(ChessBoard board, ChessPosition position){
         Set<ChessMove> validMoves = new HashSet<>();
         for (int d = 1; d < 9; d++) {
@@ -57,15 +53,7 @@ public class KingMoveCalculator implements ChessMoveCalculator {
                     yield 0;
                 }
             };
-
-            // Check if move is out of bounds
-            if (inBounds(position.getRow()+r,position.getColumn()+c)) {
-                ChessPosition movePosition = new ChessPosition(position.getRow()+r, position.getColumn()+c);
-                if (board.getPiece(movePosition) == null
-                        || board.getPiece(movePosition).getTeamColor() != board.getPiece(position).getTeamColor()) {
-                    validMoves.add(new ChessMove(position, movePosition, null));
-                }
-            }
+            validMoves.addAll(new LineMoveCalculator().validMovesOnLine(board,position,r,c, 1));
         }
         return validMoves;
     }
