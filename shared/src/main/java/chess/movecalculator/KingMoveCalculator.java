@@ -10,123 +10,63 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class KingMoveCalculator implements ChessMoveCalculator {
+    private boolean inBounds(int row, int col){
+        return (row < 9) && (row > 0) && (col < 9) && (col > 0);
+    }
+
     public Collection<ChessMove> moveCalculator(ChessBoard board, ChessPosition position){
         Set<ChessMove> validMoves = new HashSet<>();
-        //UP
-        // Check if move is out of bounds
-        if (position.getRow()+1 <= 8){
-            ChessPosition movePosition = new ChessPosition(position.getRow()+1,position.getColumn());
-            if (board.getPiece(movePosition) != null){
-                if (board.getPiece(movePosition).getTeamColor() != board.getPiece(position).getTeamColor()) {
-                    validMoves.add(new ChessMove(position, movePosition, null));
+        for (int d = 1; d < 9; d++) {
+            int r;
+            int c = switch (d) {
+                case 1 -> {
+                    r = 1;
+                    yield 0;
                 }
-            } else {
-                validMoves.add(new ChessMove(position, movePosition, null));
-            }
-        }
-
-
-        //LEFT
-        // Check if move is out of bounds
-        if (position.getColumn()-1 >= 1){
-            // IF PIECE in spot (Add if opposite color)
-            ChessPosition movePosition = new ChessPosition(position.getRow(),position.getColumn()-1);
-            if (board.getPiece(movePosition) != null){
-                if (board.getPiece(movePosition).getTeamColor() != board.getPiece(position).getTeamColor()){
-                    validMoves.add(new ChessMove(position,movePosition,null));
+                case 2 -> {
+                    r = 0;
+                    yield 1;
                 }
-            } else {
-                validMoves.add(new ChessMove(position, movePosition, null));
-            }
-        }
-
-
-        //DOWN
-        // Check if move is out of bounds
-        if (position.getRow()-1 >= 1){
-            // IF PIECE in spot (Add if opposite color)
-            ChessPosition movePosition = new ChessPosition(position.getRow()-1,position.getColumn());
-            if (board.getPiece(movePosition) != null){
-                if (board.getPiece(movePosition).getTeamColor() != board.getPiece(position).getTeamColor()){
-                    validMoves.add(new ChessMove(position,movePosition,null));
+                case 3 -> {
+                    r = 0;
+                    yield -1;
                 }
-            } else {
-            validMoves.add(new ChessMove(position,movePosition,null));
-            }
-        }
-        //RIGHT
-        // Check if move is out of bounds
-        if (position.getColumn()+1 <= 8){
-            // IF PIECE in spot (Add if opposite color)
-            ChessPosition movePosition = new ChessPosition(position.getRow(),position.getColumn()+1);
-            if (board.getPiece(movePosition) != null){
-                if (board.getPiece(movePosition).getTeamColor() != board.getPiece(position).getTeamColor()){
-                    validMoves.add(new ChessMove(position,movePosition,null));
+                case 4 -> {
+                    r = -1;
+                    yield 0;
                 }
-            } else {
-                validMoves.add(new ChessMove(position,movePosition,null));
-            }
-        }
-
-        //UPRIGHT
-        // Check if move is out of bounds
-        if (position.getRow()+1 <= 8 &&position.getColumn()+1 <= 8){
-            // IF PIECE in spot (Add if opposite color)
-            ChessPosition movePosition = new ChessPosition(position.getRow()+1,position.getColumn()+1);
-            if (board.getPiece(movePosition) != null){
-                if (board.getPiece(movePosition).getTeamColor() != board.getPiece(position).getTeamColor()){
-                    validMoves.add(new ChessMove(position,movePosition,null));
+                case 5 -> {
+                    r = 1;
+                    yield 1;
                 }
-            } else {
-                validMoves.add(new ChessMove(position,movePosition,null));
-            }
-        }
-
-        //UPLEFT
-        // Check if move is out of bounds
-        if (position.getRow()+1 <= 8 && position.getColumn()-1 >= 1){
-            // IF PIECE in spot (Add if opposite color)
-            ChessPosition movePosition = new ChessPosition(position.getRow()+1,position.getColumn()-1);
-            if (board.getPiece(movePosition) != null){
-                if (board.getPiece(movePosition).getTeamColor() != board.getPiece(position).getTeamColor()){
-                    validMoves.add(new ChessMove(position,movePosition,null));
+                case 6 -> {
+                    r = -1;
+                    yield 1;
                 }
-            } else {
-                validMoves.add(new ChessMove(position, movePosition, null));
-            }
-        }
+                case 7 -> {
+                    r = 1;
+                    yield -1;
+                }
+                case 8 -> {
+                    r = -1;
+                    yield -1;
+                }
 
-
-        //DOWNLEFT
+                default -> {
+                    r = 0;
+                    yield 0;
+                }
+            };
 
             // Check if move is out of bounds
-            if (position.getRow()-1 >= 1 && position.getColumn()-1 >= 1){
-                // IF PIECE in spot (Add if opposite color)
-                ChessPosition movePosition = new ChessPosition(position.getRow()-1,position.getColumn()-1);
-                if (board.getPiece(movePosition) != null){
-                    if (board.getPiece(movePosition).getTeamColor() != board.getPiece(position).getTeamColor()){
-                        validMoves.add(new ChessMove(position,movePosition,null));
-                    }
-                } else {
-                validMoves.add(new ChessMove(position,movePosition,null));
+            if (inBounds(position.getRow()+r,position.getColumn()+c)) {
+                ChessPosition movePosition = new ChessPosition(position.getRow()+r, position.getColumn()+c);
+                if (board.getPiece(movePosition) == null
+                        || board.getPiece(movePosition).getTeamColor() != board.getPiece(position).getTeamColor()) {
+                    validMoves.add(new ChessMove(position, movePosition, null));
                 }
-            }
-
-        //DOWNRIGHT
-        // Check if move is out of bounds
-        if (position.getRow()-1 >= 1 && position.getColumn()+1 <= 8){
-            // IF PIECE in spot (Add if opposite color)
-            ChessPosition movePosition = new ChessPosition(position.getRow()-1,position.getColumn()+1);
-            if (board.getPiece(movePosition) != null){
-                if (board.getPiece(movePosition).getTeamColor() != board.getPiece(position).getTeamColor()){
-                    validMoves.add(new ChessMove(position,movePosition,null));
-                }
-            } else {
-                validMoves.add(new ChessMove(position,movePosition,null));
             }
         }
-
-
         return validMoves;
     }
 }

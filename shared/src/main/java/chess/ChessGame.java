@@ -127,30 +127,30 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        ChessPiece pieceMoved = chessBoard.getPiece(move.getStartPosition());
+        ChessPiece pMoved = chessBoard.getPiece(move.getStartPosition());
 
         /*NORMAL MOVES*/
         //update
-        if (pieceMoved != null
-                && pieceMoved.pieceMoves(chessBoard, move.getStartPosition()).contains(move)
-                && pieceMoved.getTeamColor() == this.teamTurn) {
+        if (pMoved != null
+                && pMoved.pieceMoves(chessBoard, move.getStartPosition()).contains(move)
+                && pMoved.getTeamColor() == this.teamTurn) {
             /* Move */
-            if ((pieceMoved.getPieceType() == ChessPiece.PieceType.PAWN && move.getPromotionPiece() != null)) {
-                chessBoard.addPiece(move.getEndPosition(), new ChessPiece(pieceMoved.getTeamColor(), move.getPromotionPiece()));
+            if ((pMoved.getPieceType() == ChessPiece.PieceType.PAWN && move.getPromotionPiece() != null)) {
+                chessBoard.addPiece(move.getEndPosition(), new ChessPiece(pMoved.getTeamColor(), move.getPromotionPiece()));
             } else {
-                chessBoard.addPiece(move.getEndPosition(), pieceMoved);
+                chessBoard.addPiece(move.getEndPosition(), pMoved);
             }
             chessBoard.addPiece(move.getStartPosition(), null);
 
-            if (isInCheck(pieceMoved.getTeamColor())){
+            if (isInCheck(pMoved.getTeamColor())){
                 // undo
-                chessBoard.addPiece(move.getStartPosition(), pieceMoved);
+                chessBoard.addPiece(move.getStartPosition(), pMoved);
                 chessBoard.addPiece(move.getEndPosition(), null);
                 // Error
                 throw new InvalidMoveException("Move is invalid");
             }
         } else {
-            throw new InvalidMoveException((pieceMoved != null && pieceMoved.getTeamColor() != this.teamTurn)?"Move is out of turn" : "Move is invalid");
+            throw new InvalidMoveException("Move is invalid");
         }
 
         // Status update
