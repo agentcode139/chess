@@ -17,6 +17,7 @@ class LineMoveCalculator implements LinearMoveCalculator {
         return (row < 9) && (row > 0) && (col < 9) && (col > 0);
     }
 
+    @Override
     public Collection<ChessMove> validMovesOnLine(ChessBoard board, ChessPosition startPos, int rIter, int cIter, int dist) {
         Set<ChessMove> moves = new HashSet<>();
         if (dist > 8) {

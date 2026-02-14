@@ -27,19 +27,6 @@ public class ChessBoard {
 
     }
 
-    @Override
-    public ChessBoard clone(){
-        try {
-            ChessBoard clone = (ChessBoard) super.clone();
-
-            clone.gameboard = gameboard.clone();
-
-            return clone;
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     /**
      * Adds a chess piece to the chessboard
      *
