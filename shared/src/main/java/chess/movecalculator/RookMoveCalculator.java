@@ -9,31 +9,10 @@ import java.util.Set;
 public class RookMoveCalculator implements ChessMoveCalculator {
     public Collection<ChessMove> moveCalculator(ChessBoard board, ChessPosition position){
         Set<ChessMove> validMoves = new HashSet<>();
-        for (int d = 1; d < 5; d++) {
-            int r;
-            int c = switch (d) {
-                case 1 -> {
-                    r = 1;
-                    yield 0;
-                }
-                case 2 -> {
-                    r = 0;
-                    yield 1;
-                }
-                case 3 -> {
-                    r = 0;
-                    yield -1;
-                }
-                case 4 -> {
-                    r = -1;
-                    yield 0;
-                }
-                default -> {
-                    r = 0;
-                    yield 0;
-                }
-            };
-            validMoves.addAll(new LineMoveCalculator().validMovesOnLine(board,position,r,c, 8));
+        for (int d = 0; d < 2; d++) {
+            int dir = (int)Math.pow(-1,d);
+            validMoves.addAll(new LineMoveCalculator().validMovesOnLine(board,position,dir,0, 8));
+            validMoves.addAll(new LineMoveCalculator().validMovesOnLine(board,position,0,dir, 8));
         }
         return validMoves;
     }
