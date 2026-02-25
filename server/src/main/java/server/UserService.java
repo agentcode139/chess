@@ -4,15 +4,16 @@ import dataaccess.DataAccessException;
 import io.javalin.http.Context;
 import kotlin.NotImplementedError;
 
+import java.util.List;
 import java.util.UUID;
 
 public class UserService {
-    public void register(Context ctx) throws DataAccessException {
+    public LoginResult register(Context ctx) throws DataAccessException {
         throw new NotImplementedError();
         // TODO Create user then login
     }
 
-    public void login(Context ctx) throws DataAccessException {
+    public LoginResult login(Context ctx) throws DataAccessException {
         throw new NotImplementedError();
     }
 
@@ -23,14 +24,14 @@ public class UserService {
         throw new NotImplementedError();
     }
 
-    public void createGame(Context ctx) throws DataAccessException {
+    public String createGame(Context ctx) throws DataAccessException {
         if (isAuthorized(ctx)){
 
         }
         throw new NotImplementedError();
     }
 
-    public void listGames(Context ctx) throws DataAccessException {
+    public List<GameData> listGames(Context ctx) throws DataAccessException {
         if (isAuthorized(ctx)){
 
         }
