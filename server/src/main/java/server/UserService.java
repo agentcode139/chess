@@ -46,9 +46,7 @@ public class UserService {
     }
 
     public void clear(Context ctx) throws DataAccessException {
-        if (isAuthorized(ctx)){
 
-        }
         throw new NotImplementedError();
     }
 
