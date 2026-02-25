@@ -1,6 +1,9 @@
 package server;
 
 import io.javalin.*;
+import io.javalin.http.Context;
+import jdk.jshell.spi.ExecutionControl;
+import kotlin.NotImplementedError;
 
 public class Server {
 
@@ -21,4 +24,37 @@ public class Server {
     public void stop() {
         javalin.stop();
     }
+
+    private void register(Context ctx) {
+        throw new NotImplementedError();
+    }
+
+    private void login(Context ctx) {
+        throw new NotImplementedError();
+    }
+
+    private void logout(Context ctx) {
+        throw new NotImplementedError();
+    }
+
+    private void createGame(Context ctx) {
+        throw new NotImplementedError();
+    }
+
+    private void listGames(Context ctx) {
+        throw new NotImplementedError();
+    }
+
+    private void joinGame(Context ctx) {
+        throw new NotImplementedError();
+    }
+
+    private boolean isAuthorized(Context ctx) {
+        throw new NotImplementedError();
+    }
+
+    private void clear(Context ctx) {
+        throw new NotImplementedError();
+    }
+
 }
