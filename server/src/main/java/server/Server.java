@@ -5,8 +5,15 @@ import dataaccess.DataAccessException;
 import io.javalin.*;
 import io.javalin.http.Context;
 import kotlin.NotImplementedError;
+import server.exception.BadRequestException;
+import server.exception.ServiceException;
 import server.exception.UnauthorizedException;
+import server.request.CreateGameRequest;
+import server.request.JoinGameRequest;
+import server.request.LoginRequest;
 import server.request.RegisterRequest;
+import server.result.CreateGameResult;
+import server.result.ListGamesResult;
 import server.result.LoginResult;
 
 import java.util.UUID;
@@ -14,19 +21,20 @@ import java.util.UUID;
 public class Server {
 
     private final Javalin javalin;
+    private final Gson gson = new Gson();
 
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
 
         // Register your endpoints and exception handlers here.
         javalin.post("/user", this::register)
-        .post("/session", this::login)
-        .delete("/session", this::logout)
-        .get("/game", this::listGames)
-        .post("/game", this::createGame)
-        .put("/game", this::joinGame)
-        .delete("/db", this::clear);
-        //.exception(RequestException.class, this::handleException);
+                .post("/session", this::login)
+                .delete("/session", this::logout)
+                .get("/game", this::listGames)
+                .post("/game", this::createGame)
+                .put("/game", this::joinGame)
+                .delete("/db", this::clear)
+                .exception(ServiceException.class, this::handleException);
     }
 
     public int run(int desiredPort) {
@@ -41,53 +49,76 @@ public class Server {
     /* HANDLERS */
 
     private void register(Context ctx) throws Exception {
-        RegisterRequest request = deserializeRequestBody(ctx.body(), RegisterRequest.class);
-
+        RegisterRequest request = gson.fromJson(ctx.body(), RegisterRequest.class);
+        if (request.username() == null || request.password() == null || request.email() == null){
+            throw new BadRequestException();
+        }
         LoginResult result = Service.addUser(request);
-        ctx.json(gson.toJson(result));
+        ctx.status(200).json(gson.toJson(result));
     }
 
     private void login(Context ctx) throws Exception {
-        throw new NotImplementedError();
+        LoginRequest request = gson.fromJson(ctx.body(), LoginRequest.class);
+        if (request.username() == null || request.password() == null){
+            throw new BadRequestException();
+        }
+        LoginResult result = Service.loginUser(request);
+        ctx.status(200).json(gson.toJson(result));
     }
 
     private void logout(Context ctx) throws Exception {
-        isAuthorized(ctx);
-        throw new NotImplementedError();
+        final String authToken = isAuthorized(ctx);
+        Service.logoutUser(authToken);
+        ctx.status(200).json(gson.toJson(new Object()));
     }
 
     private void createGame(Context ctx) throws Exception {
-        isAuthorized(ctx);
-        throw new NotImplementedError();
+        final String authToken = isAuthorized(ctx);
+        CreateGameRequest request = gson.fromJson(ctx.body(), CreateGameRequest.class);
+        if (request.gameName() == null){
+            throw new BadRequestException();
+        }
+        CreateGameResult result = Service.createGame(request);
+        ctx.status(200).json(gson.toJson(new Object()));
     }
 
     private void listGames(Context ctx) throws Exception {
-        isAuthorized(ctx);
-        throw new NotImplementedError();
+        final String authToken = isAuthorized(ctx);
+        ListGamesResult result = Service.listGames(authToken);
+        ctx.status(200).json(gson.toJson(result));
     }
 
     private void joinGame(Context ctx) throws Exception {
-        isAuthorized(ctx);
-        throw new NotImplementedError();
+        final String authToken = isAuthorized(ctx);
+        JoinGameRequest request = gson.fromJson(ctx.body(), JoinGameRequest.class);
+        if (request.playerColor() == null){
+            throw new BadRequestException();
+        }
+        Service.joinGame(request);
+        ctx.status(200).json(gson.toJson(new Object()));
     }
 
     private void clear(Context ctx) throws Exception {
-        ctx.status(200);
-        ctx.result(new Gson().toJson("{}"));
+        Service.clearData();
+        ctx.status(200).json(gson.toJson(new Object()));
     }
 
     /* Helpers */
+
+    private void handleException(ServiceException e, Context ctx){
+        ctx.status(e.getStatusCode()).json(e.responseAsJson());
+    }
 
     private String generateToken() {
         return UUID.randomUUID().toString();
     }
 
-    private void isAuthorized(Context ctx) throws UnauthorizedException {
+    private String isAuthorized(Context ctx) throws UnauthorizedException {
         final String authToken = ctx.header("Authorization");
-
         if (authToken == null){
             throw new UnauthorizedException();
         }
+        return authToken;
     }
 
 }
