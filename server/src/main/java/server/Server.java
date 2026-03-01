@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import io.javalin.*;
 import io.javalin.http.Context;
-import kotlin.NotImplementedError;
+import org.jetbrains.annotations.NotNull;
 import server.exception.BadRequestException;
 import server.exception.ServiceException;
 import server.exception.UnauthorizedException;
@@ -48,7 +48,7 @@ public class Server {
 
     /* HANDLERS */
 
-    private void register(Context ctx) throws Exception {
+    private void register(@NotNull Context ctx) throws Exception {
         RegisterRequest request = gson.fromJson(ctx.body(), RegisterRequest.class);
         if (request.username() == null || request.password() == null || request.email() == null){
             throw new BadRequestException();
@@ -57,7 +57,7 @@ public class Server {
         ctx.status(200).json(gson.toJson(result));
     }
 
-    private void login(Context ctx) throws Exception {
+    private void login(@NotNull Context ctx) throws Exception {
         LoginRequest request = gson.fromJson(ctx.body(), LoginRequest.class);
         if (request.username() == null || request.password() == null){
             throw new BadRequestException();
@@ -98,14 +98,14 @@ public class Server {
         ctx.status(200).json(gson.toJson(new Object()));
     }
 
-    private void clear(Context ctx) throws Exception {
+    private void clear(@NotNull Context ctx) throws Exception {
         Service.clearData();
         ctx.status(200).json(gson.toJson(new Object()));
     }
 
     /* Helpers */
 
-    private void handleException(ServiceException e, Context ctx){
+    private void handleException(@NotNull ServiceException e, @NotNull Context ctx){
         ctx.status(e.getStatusCode()).json(e.responseAsJson());
     }
 
@@ -113,7 +113,8 @@ public class Server {
         return UUID.randomUUID().toString();
     }
 
-    private String isAuthorized(Context ctx) throws UnauthorizedException {
+    @NotNull
+    private String isAuthorized(@NotNull Context ctx) throws UnauthorizedException {
         final String authToken = ctx.header("Authorization");
         if (authToken == null){
             throw new UnauthorizedException();

@@ -1,7 +1,0 @@
-package server.exception;
-
-public class AlreadyTakenException extends ServiceException {
-    public AlreadyTakenException(){
-        super(403, "Already Taken");
-    }
-}
