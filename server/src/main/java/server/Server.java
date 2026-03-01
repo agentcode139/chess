@@ -1,7 +1,6 @@
 package server;
 
 import com.google.gson.Gson;
-import dataaccess.DataAccessException;
 import io.javalin.*;
 import io.javalin.http.Context;
 import org.jetbrains.annotations.NotNull;
@@ -22,10 +21,11 @@ public class Server {
 
     private final Javalin javalin;
     private final Gson gson = new Gson();
+    private final Service service;
 
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
-
+        service = new Service();
         // Register your endpoints and exception handlers here.
         javalin.post("/user", this::register)
                 .post("/session", this::login)
@@ -53,7 +53,7 @@ public class Server {
         if (request.username() == null || request.password() == null || request.email() == null){
             throw new BadRequestException();
         }
-        LoginResult result = Service.addUser(request);
+        LoginResult result = service.addUser(request);
         ctx.status(200).json(gson.toJson(result));
     }
 
@@ -62,13 +62,13 @@ public class Server {
         if (request.username() == null || request.password() == null){
             throw new BadRequestException();
         }
-        LoginResult result = Service.loginUser(request);
+        LoginResult result = service.loginUser(request);
         ctx.status(200).json(gson.toJson(result));
     }
 
     private void logout(Context ctx) throws Exception {
         final String authToken = isAuthorized(ctx);
-        Service.logoutUser(authToken);
+        service.logoutUser(authToken);
         ctx.status(200).json(gson.toJson(new Object()));
     }
 
@@ -78,13 +78,13 @@ public class Server {
         if (request.gameName() == null){
             throw new BadRequestException();
         }
-        CreateGameResult result = Service.createGame(request);
+        CreateGameResult result = service.createGame(request);
         ctx.status(200).json(gson.toJson(new Object()));
     }
 
     private void listGames(Context ctx) throws Exception {
         final String authToken = isAuthorized(ctx);
-        ListGamesResult result = Service.listGames(authToken);
+        ListGamesResult result = service.listGames(authToken);
         ctx.status(200).json(gson.toJson(result));
     }
 
@@ -94,12 +94,12 @@ public class Server {
         if (request.playerColor() == null){
             throw new BadRequestException();
         }
-        Service.joinGame(request);
+        service.joinGame(request);
         ctx.status(200).json(gson.toJson(new Object()));
     }
 
     private void clear(@NotNull Context ctx) throws Exception {
-        Service.clearData();
+        service.clearData();
         ctx.status(200).json(gson.toJson(new Object()));
     }
 
@@ -107,10 +107,6 @@ public class Server {
 
     private void handleException(@NotNull ServiceException e, @NotNull Context ctx){
         ctx.status(e.getStatusCode()).json(e.responseAsJson());
-    }
-
-    private String generateToken() {
-        return UUID.randomUUID().toString();
     }
 
     @NotNull

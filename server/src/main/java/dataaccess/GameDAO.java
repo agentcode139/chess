@@ -1,10 +1,12 @@
 package dataaccess;
 
+import dataaccess.exception.DataAccessException;
+
 import java.util.Collection;
 
-public interface GameDAO {
-    int addGame() throws DataAccessException;
-    GameData getGame() throws DataAccessException;
+public interface GameDAO extends GeneralDAO{
+    int addGame(String game) throws DataAccessException;
+    GameData getGame(int gameID) throws DataAccessException;
     Collection<GameData> getAllGames() throws DataAccessException;
-    void updateGame() throws DataAccessException;
+    void updateGame(GameData game) throws DataAccessException;
 }
