@@ -97,6 +97,7 @@ public class Server {
     }
 
     private void clear(@NotNull Context ctx) throws Exception {
+        //final String authToken = isAuthorized(ctx);
         service.clearData();
         ctx.status(200).json(gson.toJson(new Object()));
     }

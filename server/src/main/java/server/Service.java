@@ -100,8 +100,9 @@ public class Service {
     }
 
     public void clearData() throws ServiceException {
-            this.userDAO.clear();
-            this.authDAO.clear();
-            this.gameDAO.clear();
+        //validateAuthToken(authToken);
+        this.userDAO.clear();
+        this.authDAO.clear();
+        this.gameDAO.clear();
     }
 }
