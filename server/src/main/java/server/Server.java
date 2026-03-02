@@ -50,7 +50,7 @@ public class Server {
 
     private void register(@NotNull Context ctx) throws Exception {
         RegisterRequest request = gson.fromJson(ctx.body(), RegisterRequest.class);
-        if (request.username() == null || request.password() == null || request.email() == null){
+        if (request.username() == null || request.password() == null || request.email() == null) {
             throw new BadRequestException();
         }
         LoginResult result = service.addUser(request);
@@ -59,7 +59,7 @@ public class Server {
 
     private void login(@NotNull Context ctx) throws Exception {
         LoginRequest request = gson.fromJson(ctx.body(), LoginRequest.class);
-        if (request.username() == null || request.password() == null){
+        if (request.username() == null || request.password() == null) {
             throw new BadRequestException();
         }
         LoginResult result = service.loginUser(request);
@@ -73,13 +73,12 @@ public class Server {
     }
 
     private void createGame(Context ctx) throws Exception {
-        final String authToken = isAuthorized(ctx);
         CreateGameRequest request = gson.fromJson(ctx.body(), CreateGameRequest.class);
-        if (request.gameName() == null){
+        if (request.gameName() == null) {
             throw new BadRequestException();
         }
         CreateGameResult result = service.createGame(request);
-        ctx.status(200).json(gson.toJson(new Object()));
+        ctx.status(200).json(gson.toJson(result));
     }
 
     private void listGames(Context ctx) throws Exception {
@@ -89,9 +88,8 @@ public class Server {
     }
 
     private void joinGame(Context ctx) throws Exception {
-        final String authToken = isAuthorized(ctx);
         JoinGameRequest request = gson.fromJson(ctx.body(), JoinGameRequest.class);
-        if (request.playerColor() == null){
+        if (request.playerColor() == null) {
             throw new BadRequestException();
         }
         service.joinGame(request);
@@ -105,14 +103,14 @@ public class Server {
 
     /* Helpers */
 
-    private void handleException(@NotNull ServiceException e, @NotNull Context ctx){
+    private void handleException(@NotNull ServiceException e, @NotNull Context ctx) {
         ctx.status(e.getStatusCode()).json(e.responseAsJson());
     }
 
     @NotNull
     private String isAuthorized(@NotNull Context ctx) throws UnauthorizedException {
         final String authToken = ctx.header("Authorization");
-        if (authToken == null){
+        if (authToken == null) {
             throw new UnauthorizedException();
         }
         return authToken;
