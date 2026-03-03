@@ -6,6 +6,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import server.Service;
+import server.exception.ServiceException;
+import server.request.LoginRequest;
 import server.request.RegisterRequest;
 import server.result.LoginResult;
 
@@ -16,8 +18,6 @@ public class ServiceTests {
 
     private static Service service;
 
-
-
     @BeforeAll
     public static void init(){
         userDAO = new MemUserDAO();
@@ -25,6 +25,11 @@ public class ServiceTests {
         gameDAO = new MemGameDAO();
 
         service = new Service(userDAO,authDAO,gameDAO);
+        try {
+            service.addUser(new RegisterRequest("TestUser1","123456","atat@hotmail.com"));
+        } catch (ServiceException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     // Register
@@ -37,6 +42,15 @@ public class ServiceTests {
         Assertions.assertEquals("User1", registerResult.username());
         // DATABASE
         assert Assertions.assertDoesNotThrow(() -> userDAO.getUser("User1")) != null;
+    }
+
+    @Test
+    @Order(2)
+    public void loginPositive(){
+        LoginRequest loginRequest = new LoginRequest("TestUser1","123456");
+
+        LoginResult loginResult = Assertions.assertDoesNotThrow(() -> service.loginUser(loginRequest));
+        assert loginResult != null;
     }
 
 }
