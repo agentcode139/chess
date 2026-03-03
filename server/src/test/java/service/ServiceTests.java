@@ -1,5 +1,6 @@
 package service;
 
+import chess.ChessGame;
 import dataaccess.*;
 import dataaccess.exception.DataAccessException;
 import org.junit.jupiter.api.Assertions;
@@ -7,9 +8,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import server.Service;
 import server.exception.ServiceException;
+import server.request.CreateGameRequest;
 import server.request.LoginRequest;
 import server.request.RegisterRequest;
+import server.result.CreateGameResult;
 import server.result.LoginResult;
+
+import java.util.Objects;
 
 public class ServiceTests {
     private static UserDAO userDAO;
@@ -17,6 +22,8 @@ public class ServiceTests {
     private static GameDAO gameDAO;
 
     private static Service service;
+
+    private static String AUTHTOKEN;
 
     @BeforeAll
     public static void init(){
@@ -26,7 +33,8 @@ public class ServiceTests {
 
         service = new Service(userDAO,authDAO,gameDAO);
         try {
-            service.addUser(new RegisterRequest("TestUser1","123456","atat@hotmail.com"));
+            LoginResult loginResult = service.addUser(new RegisterRequest("TestUser1","123456","atat@hotmail.com"));
+            AUTHTOKEN = loginResult.authToken();
         } catch (ServiceException e) {
             throw new RuntimeException(e);
         }
@@ -58,6 +66,15 @@ public class ServiceTests {
 
         Assertions.assertDoesNotThrow(()->service.logoutUser(registerResult.authToken()));
         Assertions.assertThrows(DataAccessException.class,()->authDAO.getAuth(registerResult.authToken()));
+    }
+
+    @Test
+    public void createGamePositive(){
+        CreateGameRequest createGameRequest = new CreateGameRequest("Da best Game");
+        CreateGameResult createGameResult = Assertions.assertDoesNotThrow(()->service.createGame(AUTHTOKEN,createGameRequest));
+
+        assert Objects.equals(Assertions.assertDoesNotThrow(() -> gameDAO.getGame(createGameResult.gameID())),
+                new GameData(createGameResult.gameID(), "Da best Game", null, null, new ChessGame()));
     }
 
 }
