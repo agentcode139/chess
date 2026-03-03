@@ -13,6 +13,7 @@ import server.request.JoinGameRequest;
 import server.request.LoginRequest;
 import server.request.RegisterRequest;
 import server.result.CreateGameResult;
+import server.result.ListGamesResult;
 import server.result.LoginResult;
 
 import java.util.Objects;
@@ -104,7 +105,7 @@ public class ServiceTests {
     }
 
     @Test
-    public void joinGamePositive(){
+    public void joinGameNegative(){
         CreateGameRequest createGameRequest = new CreateGameRequest("Da best Game");
         CreateGameResult createGameResult = Assertions.assertDoesNotThrow(()->service.createGame(authtoken,createGameRequest));
 
@@ -112,6 +113,21 @@ public class ServiceTests {
         Assertions.assertDoesNotThrow(() -> service.joinGame(authtoken,joinGameRequest));
 
         assert Assertions.assertDoesNotThrow(() -> gameDAO.getGame(createGameResult.gameID())).whiteUsername() != null;
+    }
+
+    @Test
+    public void listGamesPositive(){
+        ListGamesResult listGamesResult = Assertions.assertDoesNotThrow(() -> service.listGames(authtoken));
+        assert listGamesResult.games().isEmpty();
+    }
+
+    @Test
+    public void listGamesNegative(){
+        CreateGameRequest createGameRequest = new CreateGameRequest("Da best Game");
+        Assertions.assertDoesNotThrow(()->service.createGame(authtoken,createGameRequest));
+
+        ListGamesResult listGamesResult = Assertions.assertDoesNotThrow(() -> service.listGames(authtoken));
+        assert !listGamesResult.games().isEmpty();
     }
 
 }
