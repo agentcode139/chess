@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import server.Service;
 import server.exception.ServiceException;
 import server.request.CreateGameRequest;
+import server.request.JoinGameRequest;
 import server.request.LoginRequest;
 import server.request.RegisterRequest;
 import server.result.CreateGameResult;
@@ -100,6 +101,17 @@ public class ServiceTests {
 
         assert Objects.equals(Assertions.assertDoesNotThrow(() -> gameDAO.getGame(createGameResult.gameID())),
                 new GameData(createGameResult.gameID(), "Da best Game", null, null, new ChessGame()));
+    }
+
+    @Test
+    public void joinGamePositive(){
+        CreateGameRequest createGameRequest = new CreateGameRequest("Da best Game");
+        CreateGameResult createGameResult = Assertions.assertDoesNotThrow(()->service.createGame(authtoken,createGameRequest));
+
+        JoinGameRequest joinGameRequest = new JoinGameRequest("WHITE",createGameResult.gameID());
+        Assertions.assertDoesNotThrow(() -> service.joinGame(authtoken,joinGameRequest));
+
+        assert Assertions.assertDoesNotThrow(() -> gameDAO.getGame(createGameResult.gameID())).whiteUsername() != null;
     }
 
 }
