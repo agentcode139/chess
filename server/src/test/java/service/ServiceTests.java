@@ -130,4 +130,14 @@ public class ServiceTests {
         assert !listGamesResult.games().isEmpty();
     }
 
+    @Test
+    public void clearNegativeAuth(){
+        Assertions.assertDoesNotThrow(()->service.clearData());
+        Assertions.assertThrows(DataAccessException.class,()->authDAO.getAuth(authtoken));
+    }
+    @Test
+    public void clearNegativeUser(){
+        Assertions.assertDoesNotThrow(()->service.clearData());
+        Assertions.assertThrows(DataAccessException.class,()->userDAO.getUser("TestUser1"));
+    }
 }
