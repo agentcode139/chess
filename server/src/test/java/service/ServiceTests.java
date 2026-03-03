@@ -34,7 +34,6 @@ public class ServiceTests {
 
     // Register
     @Test
-    @Order(1)
     public void registerPositive(){
         RegisterRequest registerRequest = new RegisterRequest("User1", "123456","cool@hotmail.com");
 
@@ -45,7 +44,6 @@ public class ServiceTests {
     }
 
     @Test
-    @Order(2)
     public void loginPositive(){
         LoginRequest loginRequest = new LoginRequest("TestUser1","123456");
 
