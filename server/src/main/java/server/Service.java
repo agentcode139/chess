@@ -81,6 +81,7 @@ public class Service {
     }
 
     public ListGamesResult listGames(String authToken) throws ServiceException {
+        validateAuthToken(authToken);
         return new ListGamesResult(gameDAO.getAllGames());
     }
 
@@ -88,19 +89,19 @@ public class Service {
         AuthData auth = validateAuthToken(authToken);
         try {
             GameData game = gameDAO.getGame(joinGameRequest.gameID());
-            if (game == null){
+            if (game == null) {
                 throw new BadRequestException();
             }
             if (Objects.equals(joinGameRequest.playerColor(), "WHITE")) {
-                if (game.whiteUsername() != null){
+                if (game.whiteUsername() != null) {
                     throw new AlreadyTakenException();
                 }
-                gameDAO.updateGame(new GameData(game.gameID(), auth.username(), game.blackUsername(), game.gamename(), game.game()));
-            } else if (Objects.equals(joinGameRequest.playerColor(), "BLACK")){
-                if (game.blackUsername() != null){
+                gameDAO.updateGame(new GameData(game.gameID(), game.gameName(), auth.username(), game.blackUsername(), game.game()));
+            } else if (Objects.equals(joinGameRequest.playerColor(), "BLACK")) {
+                if (game.blackUsername() != null) {
                     throw new AlreadyTakenException();
                 }
-                gameDAO.updateGame(new GameData(game.gameID(), game.whiteUsername(), auth.username(), game.gamename(), game.game()));
+                gameDAO.updateGame(new GameData(game.gameID(), game.gameName(), game.whiteUsername(), auth.username(), game.game()));
             } else {
                 throw new BadRequestException();
             }

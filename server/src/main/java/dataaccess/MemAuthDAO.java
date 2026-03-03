@@ -20,19 +20,19 @@ public class MemAuthDAO implements AuthDAO {
 
     @Override
     public AuthData getAuth(String authToken) throws DataAccessException {
-        if (!authDataMap.containsKey(authToken)){
+        if (!authDataMap.containsKey(authToken)) {
             throw new NoMatchException("Doesn't exist");
         }
         return authDataMap.get(authToken);
     }
 
     @Override
-    public void deleteAuth(String authToken)  {
+    public void deleteAuth(String authToken) {
         authDataMap.remove(authToken);
     }
 
     @Override
-    public void clear()  {
+    public void clear() {
         authDataMap = new HashMap<>();
     }
 }

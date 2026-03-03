@@ -3,9 +3,9 @@ package dataaccess;
 import chess.ChessGame;
 
 public record GameData(int gameID,
+                       String gameName,
                        String whiteUsername,
                        String blackUsername,
-                       String gamename,
                        ChessGame game) {
 
 }

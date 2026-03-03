@@ -4,7 +4,9 @@ import com.google.gson.Gson;
 
 public abstract class ServiceException extends Exception {
     int statusCode;
-    record ErrorResponse(String message) {}
+
+    record ErrorResponse(String message) {
+    }
 
     protected ServiceException(int statusCode, String message) {
         super(message);

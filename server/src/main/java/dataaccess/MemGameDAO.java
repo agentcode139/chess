@@ -21,7 +21,7 @@ public class MemGameDAO implements GameDAO {
         gameIDSeed++;
         int gameID = gameIDSeed;
 
-        gameDataMap.put(gameID, new GameData(gameID, null, null, game, new ChessGame()));
+        gameDataMap.put(gameID, new GameData(gameID, game, null, null, new ChessGame()));
         return gameID;
     }
 

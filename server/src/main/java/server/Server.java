@@ -1,7 +1,7 @@
 package server;
 
 import com.google.gson.Gson;
-import io.javalin.*;
+import io.javalin.Javalin;
 import io.javalin.http.Context;
 import org.jetbrains.annotations.NotNull;
 import server.exception.BadRequestException;
@@ -76,7 +76,7 @@ public class Server {
         if (request.gameName() == null) {
             throw new BadRequestException();
         }
-        CreateGameResult result = service.createGame(authToken,request);
+        CreateGameResult result = service.createGame(authToken, request);
         ctx.status(200).json(gson.toJson(result));
     }
 
@@ -92,7 +92,7 @@ public class Server {
         if (request.playerColor() == null) {
             throw new BadRequestException();
         }
-        service.joinGame(authToken,request);
+        service.joinGame(authToken, request);
         ctx.status(200).json(gson.toJson(new Object()));
     }
 

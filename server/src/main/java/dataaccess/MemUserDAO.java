@@ -1,9 +1,8 @@
 package dataaccess;
 
+import dataaccess.exception.DataAccessException;
 import dataaccess.exception.NoMatchException;
 import dataaccess.exception.UserAlreadyExistsException;
-import server.exception.AlreadyTakenException;
-import dataaccess.exception.DataAccessException;
 
 import java.util.HashMap;
 
@@ -17,7 +16,7 @@ public class MemUserDAO implements UserDAO {
 
     @Override
     public void addUser(UserData user) throws DataAccessException {
-        if (userDataMap.containsKey(user.username())){
+        if (userDataMap.containsKey(user.username())) {
             throw new UserAlreadyExistsException();
         }
         userDataMap.put(user.username(), user);
@@ -25,7 +24,7 @@ public class MemUserDAO implements UserDAO {
 
     @Override
     public UserData getUser(String username) throws DataAccessException {
-        if (!userDataMap.containsKey(username)){
+        if (!userDataMap.containsKey(username)) {
             throw new NoMatchException("Doesn't exist");
         }
         return userDataMap.get(username);
