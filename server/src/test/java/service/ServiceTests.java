@@ -1,9 +1,9 @@
 package service;
 
 import dataaccess.*;
+import dataaccess.exception.DataAccessException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import server.Service;
 import server.exception.ServiceException;
@@ -34,7 +34,7 @@ public class ServiceTests {
 
     // Register
     @Test
-    public void registerPositive(){
+    public void registerNegative(){
         RegisterRequest registerRequest = new RegisterRequest("User1", "123456","cool@hotmail.com");
 
         LoginResult registerResult = Assertions.assertDoesNotThrow(() -> service.addUser(registerRequest));
@@ -44,11 +44,20 @@ public class ServiceTests {
     }
 
     @Test
-    public void loginPositive(){
+    public void loginNegative(){
         LoginRequest loginRequest = new LoginRequest("TestUser1","123456");
 
         LoginResult loginResult = Assertions.assertDoesNotThrow(() -> service.loginUser(loginRequest));
         assert loginResult != null;
+    }
+
+    @Test
+    public void logoutPositive(){
+        RegisterRequest registerRequest = new RegisterRequest("LogMan123", "Iminboi","test@hotmail.com");
+        LoginResult registerResult = Assertions.assertDoesNotThrow(() -> service.addUser(registerRequest));
+
+        Assertions.assertDoesNotThrow(()->service.logoutUser(registerResult.authToken()));
+        Assertions.assertThrows(DataAccessException.class,()->authDAO.getAuth(registerResult.authToken()));
     }
 
 }
