@@ -15,8 +15,6 @@ import server.result.CreateGameResult;
 import server.result.ListGamesResult;
 import server.result.LoginResult;
 
-import java.util.UUID;
-
 public class Server {
 
     private final Javalin javalin;
@@ -73,11 +71,12 @@ public class Server {
     }
 
     private void createGame(Context ctx) throws Exception {
+        String authToken = isAuthorized(ctx);
         CreateGameRequest request = gson.fromJson(ctx.body(), CreateGameRequest.class);
         if (request.gameName() == null) {
             throw new BadRequestException();
         }
-        CreateGameResult result = service.createGame(request);
+        CreateGameResult result = service.createGame(authToken,request);
         ctx.status(200).json(gson.toJson(result));
     }
 
@@ -88,11 +87,12 @@ public class Server {
     }
 
     private void joinGame(Context ctx) throws Exception {
+        final String authToken = isAuthorized(ctx);
         JoinGameRequest request = gson.fromJson(ctx.body(), JoinGameRequest.class);
         if (request.playerColor() == null) {
             throw new BadRequestException();
         }
-        service.joinGame(request);
+        service.joinGame(authToken,request);
         ctx.status(200).json(gson.toJson(new Object()));
     }
 

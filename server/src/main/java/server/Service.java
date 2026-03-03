@@ -74,8 +74,8 @@ public class Service {
         authDAO.deleteAuth(authToken);
     }
 
-    public CreateGameResult createGame(CreateGameRequest createGameRequest) throws ServiceException {
-        validateAuthToken(createGameRequest.authToken());
+    public CreateGameResult createGame(String authToken, CreateGameRequest createGameRequest) throws ServiceException {
+        validateAuthToken(authToken);
         int gameID = gameDAO.addGame(createGameRequest.gameName());
         return new CreateGameResult(gameID);
     }
@@ -84,14 +84,25 @@ public class Service {
         return new ListGamesResult(gameDAO.getAllGames());
     }
 
-    public void joinGame(JoinGameRequest joinGameRequest) throws ServiceException {
-        AuthData auth = validateAuthToken(joinGameRequest.authToken());
+    public void joinGame(String authToken, JoinGameRequest joinGameRequest) throws ServiceException {
+        AuthData auth = validateAuthToken(authToken);
         try {
             GameData game = gameDAO.getGame(joinGameRequest.gameID());
+            if (game == null){
+                throw new BadRequestException();
+            }
             if (Objects.equals(joinGameRequest.playerColor(), "WHITE")) {
-                gameDAO.updateGame(new GameData(game.gameID(), joinGameRequest.authToken(), game.blackUsername(), game.gamename(), game.game()));
+                if (game.whiteUsername() != null){
+                    throw new AlreadyTakenException();
+                }
+                gameDAO.updateGame(new GameData(game.gameID(), auth.username(), game.blackUsername(), game.gamename(), game.game()));
+            } else if (Objects.equals(joinGameRequest.playerColor(), "BLACK")){
+                if (game.blackUsername() != null){
+                    throw new AlreadyTakenException();
+                }
+                gameDAO.updateGame(new GameData(game.gameID(), game.whiteUsername(), auth.username(), game.gamename(), game.game()));
             } else {
-                gameDAO.updateGame(new GameData(game.gameID(), game.whiteUsername(), joinGameRequest.authToken(), game.gamename(), game.game()));
+                throw new BadRequestException();
             }
 
         } catch (DataAccessException ignored) {

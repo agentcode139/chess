@@ -46,6 +46,6 @@ public class MemGameDAO implements GameDAO {
     @Override
     public void clear() {
         gameDataMap = new TreeMap<>();
-        gameIDSeed = -1;
+        gameIDSeed = 0;
     }
 }
