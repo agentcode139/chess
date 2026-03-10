@@ -1,6 +1,7 @@
-package dataaccess;
+package dataaccess.generalDAO;
 
 import dataaccess.exception.DataAccessException;
+import dataaccess.records.GameData;
 
 import java.util.Collection;
 

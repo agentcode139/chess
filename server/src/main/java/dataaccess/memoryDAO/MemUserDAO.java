@@ -1,8 +1,10 @@
-package dataaccess;
+package dataaccess.memoryDAO;
 
+import dataaccess.generalDAO.UserDAO;
 import dataaccess.exception.DataAccessException;
 import dataaccess.exception.NoMatchException;
 import dataaccess.exception.UserAlreadyExistsException;
+import dataaccess.records.UserData;
 
 import java.util.HashMap;
 

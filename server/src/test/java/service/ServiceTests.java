@@ -1,8 +1,16 @@
 package service;
 
 import chess.ChessGame;
-import dataaccess.*;
 import dataaccess.exception.DataAccessException;
+import dataaccess.generalDAO.AuthDAO;
+import dataaccess.generalDAO.GameDAO;
+import dataaccess.generalDAO.UserDAO;
+import dataaccess.memoryDAO.MemAuthDAO;
+import dataaccess.memoryDAO.MemGameDAO;
+import dataaccess.memoryDAO.MemUserDAO;
+import dataaccess.records.AuthData;
+import dataaccess.records.GameData;
+import dataaccess.records.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

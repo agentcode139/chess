@@ -1,6 +1,7 @@
-package dataaccess;
+package dataaccess.generalDAO;
 
 import dataaccess.exception.DataAccessException;
+import dataaccess.records.AuthData;
 
 public interface AuthDAO extends GeneralDAO {
     void addAuth(AuthData data);

@@ -1,7 +1,9 @@
-package dataaccess;
+package dataaccess.memoryDAO;
 
+import dataaccess.generalDAO.AuthDAO;
 import dataaccess.exception.DataAccessException;
 import dataaccess.exception.NoMatchException;
+import dataaccess.records.AuthData;
 
 import java.util.HashMap;
 

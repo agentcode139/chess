@@ -1,4 +1,4 @@
-package passoff.server;
+package mysqlDatabase;
 
 public class DataStorageTests {
 }

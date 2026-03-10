@@ -1,4 +1,4 @@
-package dataaccess;
+package dataaccess.records;
 
 public record UserData(String username,
                        String password,

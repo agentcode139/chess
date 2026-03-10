@@ -1,11 +1,13 @@
-package dataaccess;
+package dataaccess.mysqlDAO;
 
+import dataaccess.generalDAO.GameDAO;
 import dataaccess.exception.DataAccessException;
+import dataaccess.records.GameData;
 
 import java.util.Collection;
 import java.util.List;
 
-public class MySQLGameDAO implements GameDAO{
+public class MySQLGameDAO implements GameDAO {
     @Override
     public int addGame(String game) {
         return 0;
