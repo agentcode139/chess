@@ -24,7 +24,7 @@ public class MySQLGameDAO implements GameDAO {
 
     @Override
     public int addGame(String game) throws DataAccessException {
-        var statement = "INSERT INTO game(id, game) VALUES (?, ?)";
+        var statement = "INSERT INTO game(id, chessgame) VALUES (?, ?)";
 
         gameIDSeed++;
         int gameID = gameIDSeed;
@@ -39,7 +39,7 @@ public class MySQLGameDAO implements GameDAO {
     @Override
     public GameData getGame(int gameID) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT id, game FROM game WHERE id=?";
+            var statement = "SELECT id, chessgame FROM game WHERE id=?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 ps.setInt(1, gameID);
                 try (ResultSet rs = ps.executeQuery()) {
@@ -58,7 +58,7 @@ public class MySQLGameDAO implements GameDAO {
     public Collection<GameData> getAllGames() throws DataAccessException {
         Collection<GameData> result = new HashSet<>();
         try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT id, json FROM pet";
+            var statement = "SELECT id, chessgame FROM game";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
@@ -74,7 +74,10 @@ public class MySQLGameDAO implements GameDAO {
 
     @Override
     public void updateGame(GameData game) throws DataAccessException {
+        var statement = "UPDATE game SET chessgame=? WHERE id=?";
+        String json = new Gson().toJson(game);
 
+        executeUpdate(statement, json, game.gameID());
     }
 
     @Override
@@ -87,7 +90,6 @@ public class MySQLGameDAO implements GameDAO {
     private GameData readGame(ResultSet rs) throws SQLException {
         var id = rs.getInt("id");
         var json = rs.getString("game");
-        GameData gameData = new Gson().fromJson(json, GameData.class);
-        return gameData;
+        return new Gson().fromJson(json, GameData.class);
     }
 }
