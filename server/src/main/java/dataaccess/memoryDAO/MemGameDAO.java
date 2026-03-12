@@ -11,8 +11,8 @@ import java.util.TreeMap;
 
 public class MemGameDAO implements GameDAO {
 
-    TreeMap<Integer, GameData> gameDataMap;
-    int gameIDSeed;
+    private TreeMap<Integer, GameData> gameDataMap;
+    private int gameIDSeed;
 
     public MemGameDAO() {
         clear();

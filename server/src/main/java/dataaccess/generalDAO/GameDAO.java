@@ -6,11 +6,11 @@ import dataaccess.records.GameData;
 import java.util.Collection;
 
 public interface GameDAO extends GeneralDAO {
-    int addGame(String game);
+    int addGame(String game) throws DataAccessException;
 
-    GameData getGame(int gameID);
+    GameData getGame(int gameID) throws DataAccessException;
 
-    Collection<GameData> getAllGames();
+    Collection<GameData> getAllGames() throws DataAccessException;
 
     void updateGame(GameData game) throws DataAccessException;
 }
