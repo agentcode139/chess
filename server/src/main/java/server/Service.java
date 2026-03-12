@@ -4,9 +4,9 @@ import dataaccess.exception.DataAccessException;
 import dataaccess.generalDAO.AuthDAO;
 import dataaccess.generalDAO.GameDAO;
 import dataaccess.generalDAO.UserDAO;
-import dataaccess.memoryDAO.MemAuthDAO;
 import dataaccess.memoryDAO.MemGameDAO;
 import dataaccess.memoryDAO.MemUserDAO;
+import dataaccess.mysqlDAO.MySQLAuthDAO;
 import dataaccess.records.AuthData;
 import dataaccess.records.GameData;
 import dataaccess.records.UserData;
@@ -37,7 +37,7 @@ public class Service {
     }
 
     public Service() {
-        this(new MemUserDAO(), new MemAuthDAO(), new MemGameDAO());
+        this(new MemUserDAO(), new MySQLAuthDAO(), new MemGameDAO());
     }
 
     private AuthData validateAuthToken(String authToken) throws ServiceException {
@@ -53,14 +53,14 @@ public class Service {
 
         try {
             userDAO.addUser(newUser);
+
+            AuthData auth = generateAuth(registerRequest.username());
+            authDAO.addAuth(auth);
+
+            return new LoginResult(auth.username(), auth.authToken());
         } catch (DataAccessException ignored) {
             throw new AlreadyTakenException();
         }
-
-        AuthData auth = generateAuth(registerRequest.username());
-        authDAO.addAuth(auth);
-
-        return new LoginResult(auth.username(), auth.authToken());
     }
 
     public LoginResult loginUser(LoginRequest loginRequest) throws ServiceException {
@@ -79,18 +79,30 @@ public class Service {
 
     public void logoutUser(String authToken) throws ServiceException {
         validateAuthToken(authToken);
-        authDAO.deleteAuth(authToken);
+        try {
+            authDAO.deleteAuth(authToken);
+        } catch (DataAccessException e) {
+            throw new GeneralServiceException(e.getMessage());
+        }
     }
 
     public CreateGameResult createGame(String authToken, CreateGameRequest createGameRequest) throws ServiceException {
         validateAuthToken(authToken);
-        int gameID = gameDAO.addGame(createGameRequest.gameName());
-        return new CreateGameResult(gameID);
+        try {
+            int gameID = gameDAO.addGame(createGameRequest.gameName());
+            return new CreateGameResult(gameID);
+        } catch (DataAccessException e) {
+            throw new GeneralServiceException(e.getMessage());
+        }
     }
 
     public ListGamesResult listGames(String authToken) throws ServiceException {
         validateAuthToken(authToken);
-        return new ListGamesResult(gameDAO.getAllGames());
+        try {
+            return new ListGamesResult(gameDAO.getAllGames());
+        } catch (DataAccessException e) {
+            throw new GeneralServiceException(e.getMessage());
+        }
     }
 
     public void joinGame(String authToken, JoinGameRequest joinGameRequest) throws ServiceException {
@@ -119,9 +131,13 @@ public class Service {
         }
     }
 
-    public void clearData() {
-        this.userDAO.clear();
-        this.authDAO.clear();
-        this.gameDAO.clear();
+    public void clearData() throws ServiceException {
+        try {
+            this.userDAO.clear();
+            this.authDAO.clear();
+            this.gameDAO.clear();
+        } catch (DataAccessException e) {
+            throw new GeneralServiceException(e.getMessage());
+        }
     }
 }
