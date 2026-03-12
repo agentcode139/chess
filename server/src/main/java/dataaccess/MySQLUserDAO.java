@@ -14,8 +14,6 @@ import static dataaccess.DatabaseManager.executeUpdate;
 
 public class MySQLUserDAO implements UserDAO {
 
-    private final Gson gson = new Gson();
-
     @Override
     public void addUser(UserData user) throws DataAccessException {
         if (getUser(user.username()) != null) {

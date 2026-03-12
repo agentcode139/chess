@@ -104,7 +104,6 @@ public class Service {
         validateAuthToken(authToken);
         try {
             int gameID = gameDAO.addGame(createGameRequest.gameName());
-            CreateGameResult createGameResult = new CreateGameResult(gameID);
             return new CreateGameResult(gameID);
         } catch (DataAccessException e) {
             throw new GeneralServiceException(e.getMessage());
