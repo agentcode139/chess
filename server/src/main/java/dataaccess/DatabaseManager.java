@@ -1,9 +1,6 @@
 package dataaccess;
 
 import dataaccess.exception.DataAccessException;
-import dataaccess.records.AuthData;
-import dataaccess.records.GameData;
-import dataaccess.records.UserData;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.*;

@@ -44,7 +44,7 @@ public class MySQLAuthDAO implements AuthDAO {
 
     @Override
     public void clear() throws DataAccessException {
-        var statement = "TRUNCATE auths";
+        var statement = "DELETE FROM auths";
         executeUpdate(statement);
     }
 

@@ -2,6 +2,7 @@ package server;
 
 import dataaccess.*;
 import dataaccess.exception.DataAccessException;
+import dataaccess.exception.UserAlreadyExistsException;
 import dataaccess.records.AuthData;
 import dataaccess.records.GameData;
 import dataaccess.records.UserData;
@@ -39,9 +40,13 @@ public class Service {
 
     private AuthData validateAuthToken(String authToken) throws ServiceException {
         try {
-            return authDAO.getAuth(authToken);
+            AuthData authData = authDAO.getAuth(authToken);
+            if (authData == null || authData.username() == null) {
+                throw new UnauthorizedException();
+            }
+            return authData;
         } catch (DataAccessException e) {
-            throw new UnauthorizedException();
+            throw new GeneralServiceException(e.getMessage());
         }
     }
 
@@ -50,6 +55,10 @@ public class Service {
                 BCrypt.hashpw(registerRequest.password(), BCrypt.gensalt()),
                 registerRequest.email());
 
+        if (newUser.username() == null || newUser.password() == null){
+            throw new UnauthorizedException();
+        }
+
         try {
             userDAO.addUser(newUser);
 
@@ -57,15 +66,19 @@ public class Service {
             authDAO.addAuth(auth);
 
             return new LoginResult(auth.username(), auth.authToken());
-        } catch (DataAccessException ignored) {
+        } catch (UserAlreadyExistsException e){
             throw new AlreadyTakenException();
+        } catch (DataAccessException e) {
+            throw new GeneralServiceException(e.getMessage());
         }
     }
 
     public LoginResult loginUser(LoginRequest loginRequest) throws ServiceException {
         try {
             UserData user = userDAO.getUser(loginRequest.username());
-            if (user == null || !BCrypt.checkpw(loginRequest.password(), user.password())) {
+            if (user == null){
+                throw new UnauthorizedException();
+            } else if (!BCrypt.checkpw(loginRequest.password(), user.password())) {
                 throw new IncorrectPasswordException();
             }
 
@@ -74,7 +87,7 @@ public class Service {
 
             return new LoginResult(user.username(), auth.authToken());
         } catch (DataAccessException e) {
-            throw new NoUserException();
+            throw new GeneralServiceException(e.getMessage());
         }
     }
 
@@ -91,6 +104,7 @@ public class Service {
         validateAuthToken(authToken);
         try {
             int gameID = gameDAO.addGame(createGameRequest.gameName());
+            CreateGameResult createGameResult = new CreateGameResult(gameID);
             return new CreateGameResult(gameID);
         } catch (DataAccessException e) {
             throw new GeneralServiceException(e.getMessage());
@@ -127,8 +141,8 @@ public class Service {
                 throw new BadRequestException();
             }
 
-        } catch (DataAccessException ignored) {
-            throw new BadRequestException();
+        } catch (DataAccessException e) {
+            throw new GeneralServiceException(e.getMessage());
         }
     }
 

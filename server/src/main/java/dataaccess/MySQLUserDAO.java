@@ -45,7 +45,7 @@ public class MySQLUserDAO implements UserDAO {
 
     @Override
     public void clear() throws DataAccessException {
-        var statement = "TRUNCATE users";
+        var statement = "DELETE FROM users";
         executeUpdate(statement);
     }
 
@@ -53,6 +53,6 @@ public class MySQLUserDAO implements UserDAO {
         var username = rs.getString("username");
         var password = rs.getString("passwordHash");
         var email = rs.getString("email");
-        return new UserData(username,password,email);
+        return new UserData(username, password, email);
     }
 }
