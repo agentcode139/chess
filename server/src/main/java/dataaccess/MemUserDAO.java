@@ -1,6 +1,5 @@
-package dataaccess.memoryDAO;
+package dataaccess;
 
-import dataaccess.generalDAO.UserDAO;
 import dataaccess.exception.DataAccessException;
 import dataaccess.exception.NoMatchException;
 import dataaccess.exception.UserAlreadyExistsException;

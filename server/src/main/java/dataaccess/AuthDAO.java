@@ -1,4 +1,4 @@
-package dataaccess.generalDAO;
+package dataaccess;
 
 import dataaccess.exception.DataAccessException;
 import dataaccess.records.AuthData;

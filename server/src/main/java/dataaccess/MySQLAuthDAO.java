@@ -1,7 +1,5 @@
-package dataaccess.mysqlDAO;
+package dataaccess;
 
-import dataaccess.DatabaseManager;
-import dataaccess.generalDAO.AuthDAO;
 import dataaccess.exception.DataAccessException;
 import dataaccess.records.AuthData;
 

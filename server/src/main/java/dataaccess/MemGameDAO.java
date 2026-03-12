@@ -1,7 +1,6 @@
-package dataaccess.memoryDAO;
+package dataaccess;
 
 import chess.ChessGame;
-import dataaccess.generalDAO.GameDAO;
 import dataaccess.exception.DataAccessException;
 import dataaccess.exception.NoMatchException;
 import dataaccess.records.GameData;

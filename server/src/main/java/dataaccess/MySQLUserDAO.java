@@ -1,9 +1,7 @@
-package dataaccess.mysqlDAO;
+package dataaccess;
 
 import com.google.gson.Gson;
-import dataaccess.DatabaseManager;
 import dataaccess.exception.UserAlreadyExistsException;
-import dataaccess.generalDAO.UserDAO;
 import dataaccess.exception.DataAccessException;
 import dataaccess.records.UserData;
 

@@ -1,12 +1,7 @@
 package server;
 
+import dataaccess.*;
 import dataaccess.exception.DataAccessException;
-import dataaccess.generalDAO.AuthDAO;
-import dataaccess.generalDAO.GameDAO;
-import dataaccess.generalDAO.UserDAO;
-import dataaccess.memoryDAO.MemGameDAO;
-import dataaccess.memoryDAO.MemUserDAO;
-import dataaccess.mysqlDAO.MySQLAuthDAO;
 import dataaccess.records.AuthData;
 import dataaccess.records.GameData;
 import dataaccess.records.UserData;
@@ -37,7 +32,7 @@ public class Service {
     }
 
     public Service() {
-        this(new MemUserDAO(), new MySQLAuthDAO(), new MemGameDAO());
+        this(new MemUserDAO(), new MemAuthDAO(), new MemGameDAO());
     }
 
     private AuthData validateAuthToken(String authToken) throws ServiceException {

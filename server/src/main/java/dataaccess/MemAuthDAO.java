@@ -1,6 +1,5 @@
-package dataaccess.memoryDAO;
+package dataaccess;
 
-import dataaccess.generalDAO.AuthDAO;
 import dataaccess.exception.DataAccessException;
 import dataaccess.exception.NoMatchException;
 import dataaccess.records.AuthData;
