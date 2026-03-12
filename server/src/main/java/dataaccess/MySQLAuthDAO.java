@@ -1,6 +1,7 @@
 package dataaccess;
 
 import dataaccess.exception.DataAccessException;
+import dataaccess.exception.UserAlreadyExistsException;
 import dataaccess.records.AuthData;
 
 import java.sql.Connection;
@@ -14,6 +15,10 @@ public class MySQLAuthDAO implements AuthDAO {
 
     @Override
     public void addAuth(AuthData data) throws DataAccessException {
+        if (getAuth(data.authToken()) != null) {
+            throw new UserAlreadyExistsException();
+        }
+
         var statement = "INSERT INTO auths (authtoken, username) VALUES (?, ?)";
         executeUpdate(statement, data.authToken(), data.username());
     }
