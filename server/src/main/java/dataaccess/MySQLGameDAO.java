@@ -18,14 +18,6 @@ public class MySQLGameDAO implements GameDAO {
 
     private final Gson gson = new Gson();
 
-    public MySQLGameDAO() {
-        try {
-            clear();
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e.getMessage());
-        }
-    }
-
     @Override
     public int addGame(String game) throws DataAccessException {
         var statement = "INSERT INTO games (whitePlayer, blackPlayer, gameName, gameState) VALUES (?, ?, ?, ?)";
@@ -33,7 +25,7 @@ public class MySQLGameDAO implements GameDAO {
         ChessGame chessGame = new ChessGame();
         String json = gson.toJson(chessGame);
 
-        int gameID = executeUpdate(statement, game, null, null, json);
+        int gameID = executeUpdate(statement, null, null, game, json);
         if (gameID == 0) {
             throw new DataAccessException("Nothing was updated");
         }
@@ -62,12 +54,11 @@ public class MySQLGameDAO implements GameDAO {
     public Collection<GameData> getAllGames() throws DataAccessException {
         Collection<GameData> result = new HashSet<>();
         try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT id, chessgame FROM games";
-            try (PreparedStatement ps = conn.prepareStatement(statement)) {
-                try (ResultSet rs = ps.executeQuery()) {
-                    while (rs.next()) {
-                        result.add(readGame(rs));
-                    }
+            var statement = "SELECT id, whitePlayer, blackPlayer, gameName, gameState FROM games";
+            try (PreparedStatement ps = conn.prepareStatement(statement);
+                 ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    result.add(readGame(rs));
                 }
             }
         } catch (Exception e) {
@@ -78,8 +69,8 @@ public class MySQLGameDAO implements GameDAO {
 
     @Override
     public void updateGame(GameData game) throws DataAccessException {
-        var statement = "UPDATE games SET chessgame=? WHERE id=?";
-        String json = new Gson().toJson(game);
+        var statement = "UPDATE games SET gameState=? WHERE id=?";
+        String json = new Gson().toJson(game.game());
 
         executeUpdate(statement, json, game.gameID());
     }
@@ -92,7 +83,11 @@ public class MySQLGameDAO implements GameDAO {
 
     private GameData readGame(ResultSet rs) throws SQLException {
         var id = rs.getInt("id");
+        var whitePlayer = rs.getString("whitePlayer");
+        var blackPlayer = rs.getString("blackPlayer");
+        var gameName = rs.getString("gameName");
         var json = rs.getString("gameState");
-        return new Gson().fromJson(json, GameData.class);
+        ChessGame game = new Gson().fromJson(json, ChessGame.class);
+        return new GameData(id, gameName, whitePlayer, blackPlayer, game);
     }
 }

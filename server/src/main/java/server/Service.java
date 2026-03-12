@@ -30,6 +30,7 @@ public class Service {
         this.userDAO = userDAO;
         this.authDAO = authDAO;
         this.gameDAO = gameDAO;
+
     }
 
     public Service() {

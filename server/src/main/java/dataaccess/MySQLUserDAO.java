@@ -22,8 +22,7 @@ public class MySQLUserDAO implements UserDAO {
             throw new UserAlreadyExistsException();
         }
         var statement = "INSERT INTO users (username, passwordHash, email) VALUES (?, ?, ?)";
-        String json = gson.toJson(user);
-        executeUpdate(statement, user.username(), json);
+        executeUpdate(statement, user.username(), user.password(), user.email());
     }
 
     @Override
@@ -46,14 +45,14 @@ public class MySQLUserDAO implements UserDAO {
 
     @Override
     public void clear() throws DataAccessException {
-        var statement = "TRUNCATE user";
+        var statement = "TRUNCATE users";
         executeUpdate(statement);
     }
 
     private UserData readUser(ResultSet rs) throws SQLException {
-        var id = rs.getString("username");
-        var json = rs.getString("userdata");
-        UserData userData = new Gson().fromJson(json, UserData.class);
-        return userData;
+        var username = rs.getString("username");
+        var password = rs.getString("passwordHash");
+        var email = rs.getString("email");
+        return new UserData(username,password,email);
     }
 }

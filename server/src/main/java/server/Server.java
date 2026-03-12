@@ -38,17 +38,14 @@ public class Server {
     }
 
     public int run(int desiredPort) {
-        javalin.start(desiredPort);
-
         try {
             DatabaseManager.createDatabase();
             DatabaseManager.initDatabases();
         } catch (DataAccessException e) {
-            e.printStackTrace();
-            return -1; // or throw, but returning is fine
+            return -1;
         }
 
-
+        javalin.start(desiredPort);
         return javalin.port();
     }
 
