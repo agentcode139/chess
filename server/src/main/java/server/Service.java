@@ -32,7 +32,7 @@ public class Service {
     }
 
     public Service() {
-        this(new MemUserDAO(), new MemAuthDAO(), new MemGameDAO());
+        this(new MySQLUserDAO(), new MySQLAuthDAO(), new MySQLGameDAO());
     }
 
     private AuthData validateAuthToken(String authToken) throws ServiceException {

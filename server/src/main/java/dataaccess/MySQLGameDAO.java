@@ -4,6 +4,7 @@ import chess.ChessGame;
 import com.google.gson.Gson;
 import dataaccess.exception.DataAccessException;
 import dataaccess.records.GameData;
+import server.exception.GeneralServiceException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -16,8 +17,12 @@ import static dataaccess.DatabaseManager.executeUpdate;
 
 public class MySQLGameDAO implements GameDAO {
     private int gameIDSeed;
-    public MySQLGameDAO() throws DataAccessException {
-        clear();
+    public MySQLGameDAO() {
+        try {
+            clear();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     @Override
