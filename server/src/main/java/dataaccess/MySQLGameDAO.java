@@ -4,7 +4,6 @@ import chess.ChessGame;
 import com.google.gson.Gson;
 import dataaccess.exception.DataAccessException;
 import dataaccess.records.GameData;
-import server.exception.GeneralServiceException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -16,7 +15,9 @@ import java.util.HashSet;
 import static dataaccess.DatabaseManager.executeUpdate;
 
 public class MySQLGameDAO implements GameDAO {
-    private int gameIDSeed;
+
+    private final Gson gson = new Gson();
+
     public MySQLGameDAO() {
         try {
             clear();
@@ -27,22 +28,22 @@ public class MySQLGameDAO implements GameDAO {
 
     @Override
     public int addGame(String game) throws DataAccessException {
-        var statement = "INSERT INTO game(id, chessgame) VALUES (?, ?)";
+        var statement = "INSERT INTO games (whitePlayer, blackPlayer, gameName, gameState) VALUES (?, ?, ?, ?)";
 
-        gameIDSeed++;
-        int gameID = gameIDSeed;
-        GameData newGame = new GameData(gameID, game, null, null, new ChessGame());
-        String json = new Gson().toJson(newGame);
+        ChessGame chessGame = new ChessGame();
+        String json = gson.toJson(chessGame);
 
-        executeUpdate(statement, gameID, json);
-
+        int gameID = executeUpdate(statement, game, null, null, json);
+        if (gameID == 0) {
+            throw new DataAccessException("Nothing was updated");
+        }
         return gameID;
     }
 
     @Override
     public GameData getGame(int gameID) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT id, chessgame FROM game WHERE id=?";
+            var statement = "SELECT id, whitePlayer, blackPlayer, gameName, gameState FROM games WHERE id=?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 ps.setInt(1, gameID);
                 try (ResultSet rs = ps.executeQuery()) {
@@ -61,7 +62,7 @@ public class MySQLGameDAO implements GameDAO {
     public Collection<GameData> getAllGames() throws DataAccessException {
         Collection<GameData> result = new HashSet<>();
         try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT id, chessgame FROM game";
+            var statement = "SELECT id, chessgame FROM games";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
@@ -77,7 +78,7 @@ public class MySQLGameDAO implements GameDAO {
 
     @Override
     public void updateGame(GameData game) throws DataAccessException {
-        var statement = "UPDATE game SET chessgame=? WHERE id=?";
+        var statement = "UPDATE games SET chessgame=? WHERE id=?";
         String json = new Gson().toJson(game);
 
         executeUpdate(statement, json, game.gameID());
@@ -85,14 +86,13 @@ public class MySQLGameDAO implements GameDAO {
 
     @Override
     public void clear() throws DataAccessException {
-        var statement = "TRUNCATE game";
+        var statement = "TRUNCATE games";
         executeUpdate(statement);
-        gameIDSeed = 0;
     }
 
     private GameData readGame(ResultSet rs) throws SQLException {
         var id = rs.getInt("id");
-        var json = rs.getString("game");
+        var json = rs.getString("gameState");
         return new Gson().fromJson(json, GameData.class);
     }
 }

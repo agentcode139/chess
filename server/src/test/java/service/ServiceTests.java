@@ -1,13 +1,8 @@
 package service;
 
 import chess.ChessGame;
+import dataaccess.*;
 import dataaccess.exception.DataAccessException;
-import dataaccess.AuthDAO;
-import dataaccess.GameDAO;
-import dataaccess.UserDAO;
-import dataaccess.MemAuthDAO;
-import dataaccess.MemGameDAO;
-import dataaccess.MemUserDAO;
 import dataaccess.records.AuthData;
 import dataaccess.records.GameData;
 import dataaccess.records.UserData;
@@ -36,14 +31,14 @@ public class ServiceTests {
     private static String authtoken;
 
     @BeforeAll
-    public static void init(){
+    public static void init() {
         userDAO = new MemUserDAO();
         authDAO = new MemAuthDAO();
         gameDAO = new MemGameDAO();
 
-        service = new Service(userDAO,authDAO,gameDAO);
+        service = new Service(userDAO, authDAO, gameDAO);
         try {
-            LoginResult loginResult = service.addUser(new RegisterRequest("TestUser1","123456","atat@hotmail.com"));
+            LoginResult loginResult = service.addUser(new RegisterRequest("TestUser1", "123456", "atat@hotmail.com"));
             authtoken = loginResult.authToken();
         } catch (ServiceException e) {
             throw new RuntimeException(e);
@@ -52,8 +47,8 @@ public class ServiceTests {
 
     // Register
     @Test
-    public void registerNegative(){
-        RegisterRequest registerRequest = new RegisterRequest("User1", "123456","cool@hotmail.com");
+    public void registerNegative() {
+        RegisterRequest registerRequest = new RegisterRequest("User1", "123456", "cool@hotmail.com");
 
         LoginResult registerResult = Assertions.assertDoesNotThrow(() -> service.addUser(registerRequest));
         Assertions.assertEquals("User1", registerResult.username());
@@ -62,13 +57,13 @@ public class ServiceTests {
     }
 
     @Test
-    public void registerPositive(){
-        RegisterRequest registerRequest1 = new RegisterRequest("User1", "123456","cool@hotmail.com");
+    public void registerPositive() {
+        RegisterRequest registerRequest1 = new RegisterRequest("User1", "123456", "cool@hotmail.com");
 
         LoginResult registerResult1 = Assertions.assertDoesNotThrow(() -> service.addUser(registerRequest1));
         Assertions.assertEquals("User1", registerResult1.username());
 
-        RegisterRequest registerRequest2 = new RegisterRequest("User1", "password","boring@gmail.com");
+        RegisterRequest registerRequest2 = new RegisterRequest("User1", "password", "boring@gmail.com");
         Assertions.assertThrows(ServiceException.class, () -> service.addUser(registerRequest2));
         // DATABASE
         UserData user = Assertions.assertDoesNotThrow(() -> userDAO.getUser("User1"));
@@ -78,74 +73,75 @@ public class ServiceTests {
     }
 
     @Test
-    public void loginNegative(){
-        LoginRequest loginRequest = new LoginRequest("TestUser1","123456");
+    public void loginNegative() {
+        LoginRequest loginRequest = new LoginRequest("TestUser1", "123456");
 
         LoginResult loginResult = Assertions.assertDoesNotThrow(() -> service.loginUser(loginRequest));
         assert loginResult != null;
     }
 
     @Test
-    public void loginPositive(){
-        LoginRequest loginRequest = new LoginRequest("TestUser1","123456");
+    public void loginPositive() {
+        LoginRequest loginRequest = new LoginRequest("TestUser1", "123456");
 
         LoginResult loginResult = Assertions.assertDoesNotThrow(() -> service.loginUser(loginRequest));
-        AuthData authData = Assertions.assertDoesNotThrow(()->authDAO.getAuth(loginResult.authToken()));
+        AuthData authData = Assertions.assertDoesNotThrow(() -> authDAO.getAuth(loginResult.authToken()));
         assert Objects.equals(authData.username(), "TestUser1");
     }
 
     @Test
-    public void logoutPositive(){
-        RegisterRequest registerRequest = new RegisterRequest("LogMan123", "Iminboi","test@hotmail.com");
+    public void logoutPositive() {
+        RegisterRequest registerRequest = new RegisterRequest("LogMan123", "Iminboi", "test@hotmail.com");
         LoginResult registerResult = Assertions.assertDoesNotThrow(() -> service.addUser(registerRequest));
 
-        Assertions.assertDoesNotThrow(()->service.logoutUser(registerResult.authToken()));
-        Assertions.assertThrows(DataAccessException.class,()->authDAO.getAuth(registerResult.authToken()));
+        Assertions.assertDoesNotThrow(() -> service.logoutUser(registerResult.authToken()));
+        Assertions.assertThrows(DataAccessException.class, () -> authDAO.getAuth(registerResult.authToken()));
     }
 
     @Test
-    public void createGamePositive(){
+    public void createGamePositive() {
         CreateGameRequest createGameRequest = new CreateGameRequest("Da best Game");
-        CreateGameResult createGameResult = Assertions.assertDoesNotThrow(()->service.createGame(authtoken,createGameRequest));
+        CreateGameResult createGameResult = Assertions.assertDoesNotThrow(() -> service.createGame(authtoken, createGameRequest));
 
         assert Objects.equals(Assertions.assertDoesNotThrow(() -> gameDAO.getGame(createGameResult.gameID())),
                 new GameData(createGameResult.gameID(), "Da best Game", null, null, new ChessGame()));
     }
 
     @Test
-    public void joinGameNegative(){
+    public void joinGameNegative() {
         CreateGameRequest createGameRequest = new CreateGameRequest("Da best Game");
-        CreateGameResult createGameResult = Assertions.assertDoesNotThrow(()->service.createGame(authtoken,createGameRequest));
+        CreateGameResult createGameResult = Assertions.assertDoesNotThrow(() -> service.createGame(authtoken, createGameRequest));
 
-        JoinGameRequest joinGameRequest = new JoinGameRequest("WHITE",createGameResult.gameID());
-        Assertions.assertDoesNotThrow(() -> service.joinGame(authtoken,joinGameRequest));
+        JoinGameRequest joinGameRequest = new JoinGameRequest("WHITE", createGameResult.gameID());
+        Assertions.assertDoesNotThrow(() -> service.joinGame(authtoken, joinGameRequest));
 
         assert Assertions.assertDoesNotThrow(() -> gameDAO.getGame(createGameResult.gameID())).whiteUsername() != null;
     }
 
     @Test
-    public void listGamesPositive(){
+    public void listGamesPositive() {
         ListGamesResult listGamesResult = Assertions.assertDoesNotThrow(() -> service.listGames(authtoken));
         assert listGamesResult.games().isEmpty();
     }
 
     @Test
-    public void listGamesNegative(){
+    public void listGamesNegative() {
         CreateGameRequest createGameRequest = new CreateGameRequest("Da best Game");
-        Assertions.assertDoesNotThrow(()->service.createGame(authtoken,createGameRequest));
+        Assertions.assertDoesNotThrow(() -> service.createGame(authtoken, createGameRequest));
 
         ListGamesResult listGamesResult = Assertions.assertDoesNotThrow(() -> service.listGames(authtoken));
         assert !listGamesResult.games().isEmpty();
     }
 
     @Test
-    public void clearNegativeAuth(){
-        Assertions.assertDoesNotThrow(()->service.clearData());
-        Assertions.assertThrows(DataAccessException.class,()->authDAO.getAuth(authtoken));
+    public void clearNegativeAuth() {
+        Assertions.assertDoesNotThrow(() -> service.clearData());
+        Assertions.assertThrows(DataAccessException.class, () -> authDAO.getAuth(authtoken));
     }
+
     @Test
-    public void clearNegativeUser(){
-        Assertions.assertDoesNotThrow(()->service.clearData());
-        Assertions.assertThrows(DataAccessException.class,()->userDAO.getUser("TestUser1"));
+    public void clearNegativeUser() {
+        Assertions.assertDoesNotThrow(() -> service.clearData());
+        Assertions.assertThrows(DataAccessException.class, () -> userDAO.getUser("TestUser1"));
     }
 }

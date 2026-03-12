@@ -14,14 +14,14 @@ public class MySQLAuthDAO implements AuthDAO {
 
     @Override
     public void addAuth(AuthData data) throws DataAccessException {
-        var statement = "INSERT INTO auth(authtoken, username) VALUES (?, ?)";
+        var statement = "INSERT INTO auths (authtoken, username) VALUES (?, ?)";
         executeUpdate(statement, data.authToken(), data.username());
     }
 
     @Override
     public AuthData getAuth(String authToken) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT authtoken, username FROM auth WHERE authtoken=?";
+            var statement = "SELECT authtoken, username FROM auths WHERE authtoken=?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 ps.setString(1, authToken);
                 try (ResultSet rs = ps.executeQuery()) {
@@ -38,20 +38,20 @@ public class MySQLAuthDAO implements AuthDAO {
 
     @Override
     public void deleteAuth(String authToken) throws DataAccessException {
-        var statement = "DELETE FROM auth WHERE authtoken=?";
+        var statement = "DELETE FROM auths WHERE authtoken=?";
         executeUpdate(statement, authToken);
     }
 
     @Override
     public void clear() throws DataAccessException {
-        var statement = "TRUNCATE auth";
+        var statement = "TRUNCATE auths";
         executeUpdate(statement);
     }
 
     private AuthData readAuth(ResultSet rs) throws SQLException {
         var authtoken = rs.getString("authtoken");
         var username = rs.getString("username");
-        return new AuthData(authtoken,username);
+        return new AuthData(authtoken, username);
     }
 
 }

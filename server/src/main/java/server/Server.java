@@ -1,6 +1,8 @@
 package server;
 
 import com.google.gson.Gson;
+import dataaccess.DatabaseManager;
+import dataaccess.exception.DataAccessException;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import org.jetbrains.annotations.NotNull;
@@ -37,6 +39,16 @@ public class Server {
 
     public int run(int desiredPort) {
         javalin.start(desiredPort);
+
+        try {
+            DatabaseManager.createDatabase();
+            DatabaseManager.initDatabases();
+        } catch (DataAccessException e) {
+            e.printStackTrace();
+            return -1; // or throw, but returning is fine
+        }
+
+
         return javalin.port();
     }
 

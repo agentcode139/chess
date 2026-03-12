@@ -16,12 +16,13 @@ public class ChessBoard {
     public ChessBoard() {
         this.gameboard = new ChessPiece[8][8]; //Valid spots range: {0 < i,j <= 8}
     }
+
     // C++ clone technique
-    public ChessBoard(ChessBoard board){
+    public ChessBoard(ChessBoard board) {
         this.gameboard = new ChessPiece[8][8];
-        for (int i = 1; i <= 8; i++){
-            for (int j = 1; j <= 8; j++){
-                this.gameboard[i-1][j-1] = board.getPiece(new ChessPosition(i,j));
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <= 8; j++) {
+                this.gameboard[i - 1][j - 1] = board.getPiece(new ChessPosition(i, j));
             }
         }
 
@@ -34,7 +35,7 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        gameboard[position.getRow()-1][position.getColumn()-1] = piece;
+        gameboard[position.getRow() - 1][position.getColumn() - 1] = piece;
     }
 
     /**
@@ -45,7 +46,7 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
-        return gameboard[position.getRow()-1][position.getColumn()-1];
+        return gameboard[position.getRow() - 1][position.getColumn() - 1];
     }
 
     /**
@@ -63,14 +64,14 @@ public class ChessBoard {
                 ChessPiece.PieceType.KNIGHT, ChessPiece.PieceType.ROOK,
         };
         // Fill
-        for (int i = 1; i <= 8; i++){
+        for (int i = 1; i <= 8; i++) {
             // White
-            this.addPiece(new ChessPosition(1,i), new ChessPiece(ChessGame.TeamColor.WHITE, pieceOrder[i-1]));
-            this.addPiece(new ChessPosition(2,i), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
+            this.addPiece(new ChessPosition(1, i), new ChessPiece(ChessGame.TeamColor.WHITE, pieceOrder[i - 1]));
+            this.addPiece(new ChessPosition(2, i), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
 
             // Black
-            this.addPiece(new ChessPosition(7,i), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
-            this.addPiece(new ChessPosition(8,i), new ChessPiece(ChessGame.TeamColor.BLACK, pieceOrder[i-1]));
+            this.addPiece(new ChessPosition(7, i), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
+            this.addPiece(new ChessPosition(8, i), new ChessPiece(ChessGame.TeamColor.BLACK, pieceOrder[i - 1]));
         }
     }
 

@@ -13,7 +13,7 @@ public interface LinearMoveCalculator {
 }
 
 class LineMoveCalculator implements LinearMoveCalculator {
-    private boolean inBounds(int row, int col){
+    private boolean inBounds(int row, int col) {
         return (row < 9) && (row > 0) && (col < 9) && (col > 0);
     }
 
@@ -23,20 +23,20 @@ class LineMoveCalculator implements LinearMoveCalculator {
         if (dist > 8) {
             dist = 8; // Max distance
         }
-        for (int i = 1; i<=dist; i++) {
+        for (int i = 1; i <= dist; i++) {
             // Check if move is out of bounds
-            if (!inBounds(startPos.getRow()+(i*rIter), startPos.getColumn()+(i*cIter))) {
+            if (!inBounds(startPos.getRow() + (i * rIter), startPos.getColumn() + (i * cIter))) {
                 break;
             }
             // IF PIECE in spot (Add if opposite color)
-            ChessPosition movePosition = new ChessPosition(startPos.getRow()+(i*rIter),startPos.getColumn()+(i*cIter));
-            if (board.getPiece(movePosition) != null){
-                if (board.getPiece(movePosition).getTeamColor() != board.getPiece(startPos).getTeamColor()){
-                    moves.add(new ChessMove(startPos,movePosition,null));
+            ChessPosition movePosition = new ChessPosition(startPos.getRow() + (i * rIter), startPos.getColumn() + (i * cIter));
+            if (board.getPiece(movePosition) != null) {
+                if (board.getPiece(movePosition).getTeamColor() != board.getPiece(startPos).getTeamColor()) {
+                    moves.add(new ChessMove(startPos, movePosition, null));
                 }
                 break;
             }
-            moves.add(new ChessMove(startPos,movePosition,null));
+            moves.add(new ChessMove(startPos, movePosition, null));
         }
         return moves;
     }

@@ -8,7 +8,6 @@ import dataaccess.records.UserData;
 import java.sql.*;
 import java.util.Properties;
 
-import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import static java.sql.Types.NULL;
 
 public class DatabaseManager {
@@ -37,6 +36,54 @@ public class DatabaseManager {
         }
     }
 
+    public static void initDatabases() throws DataAccessException {
+        final String[] createStatements = {
+                """
+            CREATE TABLE IF NOT EXISTS  auths (
+             `authtoken` varchar(255),
+             `username` varchar(50) NOT NULL,
+             FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE,
+             PRIMARY KEY (authtoken)
+            )
+            """,
+
+                """
+            CREATE TABLE IF NOT EXISTS games (
+             `id` int AUTO_INCREMENT,
+             `whitePlayer` varchar(50),
+             `blackPlayer` varchar(50),
+             `gameName` varchar(100),
+             `gameState` TEXT,
+             `status` varchar(20),
+             `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+             PRIMARY KEY (`id`),
+             INDEX (gameName)
+            )
+            """,
+
+                """
+            CREATE TABLE IF NOT EXISTS users (
+              `username` varchar(50) NOT NULL UNIQUE,
+              `passwordHash` varchar(255) NOT NULL,
+              `email` varchar(100),
+              PRIMARY KEY (`username`)
+              INDEX (username)
+            )
+            """,
+        };
+
+        DatabaseManager.createDatabase();
+        try (Connection conn = DatabaseManager.getConnection()) {
+            for (String statement : createStatements) {
+                try (var preparedStatement = conn.prepareStatement(statement)) {
+                    preparedStatement.executeUpdate();
+                }
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException(String.format("Unable to configure database: %s", ex.getMessage()));
+        }
+    }
+
     /**
      * Create a connection to the database and sets the catalog based upon the
      * properties specified in db.properties. Connections to the database should
@@ -60,24 +107,29 @@ public class DatabaseManager {
         }
     }
 
-    public static void executeUpdate(String statement, Object... params) throws DataAccessException {
-        try (Connection conn = DatabaseManager.getConnection()) {
-            try (PreparedStatement ps = conn.prepareStatement(statement)) {
-                for (int i = 0; i < params.length; i++) {
-                    Object param = params[i];
-                    switch (param) {
-                        case String p -> ps.setString(i + 1, p);
-                        case Integer p -> ps.setInt(i + 1, p);
-                        case AuthData p -> ps.setString(i + 1, p.toString());
-                        case GameData p -> ps.setString(i + 1, p.toString());
-                        case UserData p -> ps.setString(i + 1, p.toString());
-                        case null -> ps.setNull(i + 1, NULL);
-                        default -> {
-                        }
+    public static int executeUpdate(String statement, Object... params) throws DataAccessException {
+        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement ps = conn.prepareStatement(statement)) {
+            for (int i = 0; i < params.length; i++) {
+                Object param = params[i];
+                switch (param) {
+                    case String p -> ps.setString(i + 1, p);
+                    case Integer p -> ps.setInt(i + 1, p);
+                    case AuthData p -> ps.setString(i + 1, p.toString());
+                    case GameData p -> ps.setString(i + 1, p.toString());
+                    case UserData p -> ps.setString(i + 1, p.toString());
+                    case null -> ps.setNull(i + 1, NULL);
+                    default -> {
                     }
                 }
-                ps.executeUpdate();
             }
+            ps.executeUpdate();
+
+            ResultSet rs = ps.getGeneratedKeys();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+
+            return 0;
         } catch (SQLException e) {
             throw new DataAccessException(String.format("unable to update database: %s, %s", statement, e.getMessage()));
         }

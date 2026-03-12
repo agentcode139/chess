@@ -1,8 +1,8 @@
 package dataaccess;
 
 import com.google.gson.Gson;
-import dataaccess.exception.UserAlreadyExistsException;
 import dataaccess.exception.DataAccessException;
+import dataaccess.exception.UserAlreadyExistsException;
 import dataaccess.records.UserData;
 
 import java.sql.Connection;
@@ -13,20 +13,23 @@ import java.sql.SQLException;
 import static dataaccess.DatabaseManager.executeUpdate;
 
 public class MySQLUserDAO implements UserDAO {
+
+    private final Gson gson = new Gson();
+
     @Override
     public void addUser(UserData user) throws DataAccessException {
         if (getUser(user.username()) != null) {
             throw new UserAlreadyExistsException();
         }
-        var statement = "INSERT INTO user(username, userdata) VALUES (?, ?)";
-        String json = new Gson().toJson(user);
+        var statement = "INSERT INTO users (username, passwordHash, email) VALUES (?, ?, ?)";
+        String json = gson.toJson(user);
         executeUpdate(statement, user.username(), json);
     }
 
     @Override
     public UserData getUser(String username) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT username, userdata FROM user WHERE username=?";
+            var statement = "SELECT username, passwordHash, email FROM users WHERE username=?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 ps.setString(1, username);
                 try (ResultSet rs = ps.executeQuery()) {

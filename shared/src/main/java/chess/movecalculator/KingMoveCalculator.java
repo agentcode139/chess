@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class KingMoveCalculator implements ChessMoveCalculator {
-    public Collection<ChessMove> moveCalculator(ChessBoard board, ChessPosition position){
+    public Collection<ChessMove> moveCalculator(ChessBoard board, ChessPosition position) {
         Set<ChessMove> validMoves = new HashSet<>();
         for (int d = 1; d < 9; d++) {
             int r;
@@ -53,7 +53,7 @@ public class KingMoveCalculator implements ChessMoveCalculator {
                     yield 0;
                 }
             };
-            validMoves.addAll(new LineMoveCalculator().validMovesOnLine(board,position,r,c, 1));
+            validMoves.addAll(new LineMoveCalculator().validMovesOnLine(board, position, r, c, 1));
         }
         return validMoves;
     }

@@ -5,6 +5,7 @@ import dataaccess.exception.DataAccessException;
 import dataaccess.records.AuthData;
 import dataaccess.records.GameData;
 import dataaccess.records.UserData;
+import org.mindrot.jbcrypt.BCrypt;
 import server.exception.*;
 import server.request.CreateGameRequest;
 import server.request.JoinGameRequest;
@@ -44,7 +45,9 @@ public class Service {
     }
 
     public LoginResult addUser(RegisterRequest registerRequest) throws ServiceException {
-        UserData newUser = new UserData(registerRequest.username(), registerRequest.password(), registerRequest.email());
+        UserData newUser = new UserData(registerRequest.username(),
+                BCrypt.hashpw(registerRequest.password(), BCrypt.gensalt()),
+                registerRequest.email());
 
         try {
             userDAO.addUser(newUser);
@@ -61,11 +64,13 @@ public class Service {
     public LoginResult loginUser(LoginRequest loginRequest) throws ServiceException {
         try {
             UserData user = userDAO.getUser(loginRequest.username());
-            if (!Objects.equals(user.password(), loginRequest.password())) {
+            if (user == null || !BCrypt.checkpw(loginRequest.password(), user.password())) {
                 throw new IncorrectPasswordException();
             }
+
             AuthData auth = generateAuth(user.username());
             authDAO.addAuth(auth);
+
             return new LoginResult(user.username(), auth.authToken());
         } catch (DataAccessException e) {
             throw new NoUserException();
