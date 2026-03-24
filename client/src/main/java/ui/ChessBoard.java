@@ -1,7 +1,10 @@
 package ui;
 
 import chess.ChessGame;
+import chess.ChessPiece;
+import chess.ChessPosition;
 
+import javax.print.DocFlavor;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 
@@ -18,12 +21,12 @@ public class ChessBoard {
     }
 
 
-    public void drawChessBoard(PrintStream out){
+    public void drawChessBoard(PrintStream out, chess.ChessBoard board){
         //var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         PlaceColor startingColor = PlaceColor.WHITE;
         for (int i = 0; i < BOARD_SIZE; i++){
             drawEmptyChessBoardRow(out,startingColor);
-            drawPieceChessBoardRow(out,startingColor);
+            drawPieceChessBoardRow(out,startingColor,i,board);
             drawEmptyChessBoardRow(out,startingColor);
             // In
             if (startingColor == PlaceColor.WHITE) {
@@ -34,15 +37,14 @@ public class ChessBoard {
         }
     }
 
-    private void drawPieceChessBoardRow(PrintStream out, PlaceColor color) {
-        // " " + printPiece() + " ";
-        for (int i = 0; i<BOARD_SIZE; i++) {
+    private void drawPieceChessBoardRow(PrintStream out, PlaceColor color, int i, chess.ChessBoard board) {
+        for (int j = 0; j<BOARD_SIZE; j++) {
             switch (color) {
                 case PlaceColor.WHITE -> setWhite(out);
                 case PlaceColor.BLACK -> setBlack(out);
             }
             out.print(" ");
-            printPiece(out,BLACK_PAWN);//TODO make adapt to board
+            printPiece(out,board.getPiece(new ChessPosition(i,j)));
             out.print(" ");
             if (color == PlaceColor.WHITE) {
                 color = PlaceColor.BLACK;
@@ -50,7 +52,8 @@ public class ChessBoard {
                 color = PlaceColor.WHITE;
             }
         }
-        //TODO finish row
+
+        out.println();
     }
 
     private void drawEmptyChessBoardRow(PrintStream out, PlaceColor color){
@@ -66,7 +69,8 @@ public class ChessBoard {
                 color = PlaceColor.WHITE;
             }
         }
-        //TODO finish row
+
+        out.println();
     }
 
     private static void setWhite(PrintStream out) {
@@ -89,10 +93,18 @@ public class ChessBoard {
         out.print(SET_TEXT_COLOR_GREEN);
     }
 
-    private static void printPiece(PrintStream out, String player) {
+    private static void printPiece(PrintStream out, ChessPiece player) {
         out.print(SET_BG_COLOR_WHITE);
         out.print(SET_TEXT_COLOR_BLACK);
 
+        var icon = switch (player.getPieceType()){
+            case KING -> player.getTeamColor()==ChessGame.TeamColor.WHITE? WHITE_KING:BLACK_KING;
+            case QUEEN -> player.getTeamColor()==ChessGame.TeamColor.WHITE? WHITE_QUEEN:BLACK_QUEEN;
+            case BISHOP -> player.getTeamColor()==ChessGame.TeamColor.WHITE? WHITE_BISHOP:BLACK_BISHOP;
+            case KNIGHT -> player.getTeamColor()==ChessGame.TeamColor.WHITE? WHITE_KNIGHT:BLACK_KNIGHT;
+            case ROOK -> player.getTeamColor()==ChessGame.TeamColor.WHITE? WHITE_ROOK:BLACK_ROOK;
+            case PAWN -> player.getTeamColor()==ChessGame.TeamColor.WHITE? WHITE_PAWN:BLACK_PAWN;
+        };
         out.print(player);
 
         setWhite(out);

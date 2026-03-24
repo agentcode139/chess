@@ -1,9 +1,15 @@
 package client;
 
+import chess.ChessGame;
+import com.google.gson.Gson;
+import dataaccess.records.GameData;
 import server.exception.BadRequestException;
 import server.exception.ServiceException;
+import server.request.CreateGameRequest;
 import server.request.LoginRequest;
 import server.request.RegisterRequest;
+import server.result.CreateGameResult;
+import server.result.ListGamesResult;
 import server.result.LoginResult;
 
 import java.rmi.ServerException;
@@ -80,8 +86,7 @@ public class ClientCommunicator {
             return ex.getMessage();
         }
     }
-    // TODO: add calls for all functions
-    // register
+
     public String register(String... params) throws Exception {
         if (params.length >= 3) {
             uiState = uiStates.POSTLOGIN;
@@ -100,36 +105,36 @@ public class ClientCommunicator {
         throw new BadRequestException();
     }
 
-    // logout
     public String logout() throws Exception {
         assert uiState == uiStates.POSTLOGIN;
         server.logout();
         uiState = uiStates.PRELOGIN;
-        return "You logged out";
+        return "You logged out.";
     }
 
-    // create
     public String create(String... params) throws Exception {
         assert uiState == uiStates.POSTLOGIN;
-
-        return "";
+        CreateGameResult result = server.createGame(new CreateGameRequest(params[0]));
+        return String.format("The Game ID is %d.", result.gameID());
     }
 
-    // list
     public String list() throws Exception {
         assert uiState == uiStates.POSTLOGIN;
-
-        return "";
+        ListGamesResult result = server.listGames();
+        var out = new StringBuilder();
+        var gson = new Gson();
+        for (GameData game : result.games()) {
+            out.append(gson.toJson(game)).append('\n');
+        }
+        return out.toString();
     }
 
-    // join
     public String join(String... params) throws Exception {
         assert uiState == uiStates.POSTLOGIN;
 
         return "";
     }
 
-    // observe
     public String observe(String... params) throws Exception {
         assert uiState == uiStates.POSTLOGIN;
 
@@ -140,23 +145,23 @@ public class ClientCommunicator {
         return switch (uiState) {
             case PRELOGIN ->
                     SET_TEXT_COLOR_BLUE +
-                    "register <USERNAME> <PASSWORD> <EMAIL> " + SET_TEXT_COLOR_MAGENTA + "- to create an account\n" + SET_TEXT_COLOR_BLUE +
-                    "login <USERNAME> <PASSWORD> " + SET_TEXT_COLOR_MAGENTA + "- to play chess\n" + SET_TEXT_COLOR_BLUE +
-                    "quit " + SET_TEXT_COLOR_MAGENTA + "- playing chess\n" + SET_TEXT_COLOR_BLUE +
-                    "help " + SET_TEXT_COLOR_MAGENTA + "- with possible commands\n" + SET_TEXT_COLOR_BLUE;
+                    "register <USERNAME> <PASSWORD> <EMAIL> " + SET_TEXT_COLOR_MAGENTA + "- to create an account.\n" + SET_TEXT_COLOR_BLUE +
+                    "login <USERNAME> <PASSWORD> " + SET_TEXT_COLOR_MAGENTA + "- to play chess.\n" + SET_TEXT_COLOR_BLUE +
+                    "quit " + SET_TEXT_COLOR_MAGENTA + "- playing chess.\n" + SET_TEXT_COLOR_BLUE +
+                    "help " + SET_TEXT_COLOR_MAGENTA + "- with possible commands.\n" + SET_TEXT_COLOR_BLUE;
             case POSTLOGIN ->
                     SET_TEXT_COLOR_BLUE +
-                    "create <NAME> " + SET_TEXT_COLOR_MAGENTA + "- a game\n" + SET_TEXT_COLOR_BLUE +
-                    "list " + SET_TEXT_COLOR_MAGENTA + "- games\n" + SET_TEXT_COLOR_BLUE +
-                    "join <ID> [WHITE|BLACK] " + SET_TEXT_COLOR_MAGENTA + "- a game\n" + SET_TEXT_COLOR_BLUE +
-                    "observe <ID> " + SET_TEXT_COLOR_MAGENTA + "- a game\n" + SET_TEXT_COLOR_BLUE +
-                    "logout " + SET_TEXT_COLOR_MAGENTA + "- when you are done\n" + SET_TEXT_COLOR_BLUE +
-                    "quit " + SET_TEXT_COLOR_MAGENTA + "- playing chess\n" + SET_TEXT_COLOR_BLUE +
-                    "help " + SET_TEXT_COLOR_MAGENTA + "- with possible commands\n" + SET_TEXT_COLOR_BLUE;
+                    "create <NAME> " + SET_TEXT_COLOR_MAGENTA + "- a game.\n" + SET_TEXT_COLOR_BLUE +
+                    "list " + SET_TEXT_COLOR_MAGENTA + "- games.\n" + SET_TEXT_COLOR_BLUE +
+                    "join <ID> [WHITE|BLACK] " + SET_TEXT_COLOR_MAGENTA + "- a game.\n" + SET_TEXT_COLOR_BLUE +
+                    "observe <ID> " + SET_TEXT_COLOR_MAGENTA + "- a game.\n" + SET_TEXT_COLOR_BLUE +
+                    "logout " + SET_TEXT_COLOR_MAGENTA + "- when you are done.\n" + SET_TEXT_COLOR_BLUE +
+                    "quit " + SET_TEXT_COLOR_MAGENTA + "- playing chess.\n" + SET_TEXT_COLOR_BLUE +
+                    "help " + SET_TEXT_COLOR_MAGENTA + "- with possible commands.\n" + SET_TEXT_COLOR_BLUE;
             case GAMEPLAY ->
                     SET_TEXT_COLOR_BLUE +
-                    "quit " + SET_TEXT_COLOR_MAGENTA + "- playing chess\n" + SET_TEXT_COLOR_BLUE +
-                    "help " + SET_TEXT_COLOR_MAGENTA + "- with possible commands\n" + SET_TEXT_COLOR_BLUE;
+                    "quit " + SET_TEXT_COLOR_MAGENTA + "- playing chess.\n" + SET_TEXT_COLOR_BLUE +
+                    "help " + SET_TEXT_COLOR_MAGENTA + "- with possible commands.\n" + SET_TEXT_COLOR_BLUE;
         };
     }
 }
