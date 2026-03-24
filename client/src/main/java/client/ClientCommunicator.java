@@ -1,5 +1,6 @@
 package client;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import records.GameData;
 import exception.BadRequestException;
@@ -13,13 +14,16 @@ import result.LoginResult;
 
 import java.rmi.ServerException;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
 
 public class ClientCommunicator {
     private final ServerFacade server;
+    // User Info
     private String authtoken;
+    private ChessGame.TeamColor teamColor;
 
     enum uiStates{
         PRELOGIN,
@@ -135,12 +139,13 @@ public class ClientCommunicator {
     public String join(String... params) throws Exception {
         assert uiState == uiStates.POSTLOGIN;
         server.joinGame(authtoken, new JoinGameRequest(params[0], Integer.parseInt(params[1])));
+        teamColor = (Objects.equals(params[0].toUpperCase(), "WHITE"))? ChessGame.TeamColor.WHITE: ChessGame.TeamColor.BLACK;
         return "";
     }
 
     public String observe(String... params) throws Exception {
         assert uiState == uiStates.POSTLOGIN;
-
+        teamColor = ChessGame.TeamColor.WHITE;
         return "";
     }
 

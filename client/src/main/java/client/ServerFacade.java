@@ -97,7 +97,7 @@ public class ServerFacade {
         try {
             return client.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (Exception ex) {
-            throw new GeneralServiceException(ex.getMessage());
+            throw new GeneralServiceException(ex.getMessage() + request.toString());
         }
     }
 
