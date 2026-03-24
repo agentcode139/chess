@@ -3,7 +3,7 @@ package dataaccess;
 import dataaccess.exception.DataAccessException;
 import dataaccess.exception.NoMatchException;
 import dataaccess.exception.UserAlreadyExistsException;
-import dataaccess.records.UserData;
+import records.UserData;
 
 import java.util.HashMap;
 

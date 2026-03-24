@@ -2,7 +2,7 @@ package dataaccess;
 
 import dataaccess.exception.DataAccessException;
 import dataaccess.exception.UserAlreadyExistsException;
-import dataaccess.records.AuthData;
+import records.AuthData;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

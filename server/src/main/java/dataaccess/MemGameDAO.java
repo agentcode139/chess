@@ -3,7 +3,7 @@ package dataaccess;
 import chess.ChessGame;
 import dataaccess.exception.DataAccessException;
 import dataaccess.exception.NoMatchException;
-import dataaccess.records.GameData;
+import records.GameData;
 
 import java.util.Collection;
 import java.util.TreeMap;

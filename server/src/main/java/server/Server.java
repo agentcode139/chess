@@ -6,16 +6,16 @@ import dataaccess.exception.DataAccessException;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import org.jetbrains.annotations.NotNull;
-import server.exception.BadRequestException;
-import server.exception.ServiceException;
-import server.exception.UnauthorizedException;
-import server.request.CreateGameRequest;
-import server.request.JoinGameRequest;
-import server.request.LoginRequest;
-import server.request.RegisterRequest;
-import server.result.CreateGameResult;
-import server.result.ListGamesResult;
-import server.result.LoginResult;
+import exception.BadRequestException;
+import exception.ServiceException;
+import exception.UnauthorizedException;
+import request.CreateGameRequest;
+import request.JoinGameRequest;
+import request.LoginRequest;
+import request.RegisterRequest;
+import result.CreateGameResult;
+import result.ListGamesResult;
+import result.LoginResult;
 
 public class Server {
 

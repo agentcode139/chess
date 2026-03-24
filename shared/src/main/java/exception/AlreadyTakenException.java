@@ -1,4 +1,4 @@
-package server.exception;
+package exception;
 
 public class AlreadyTakenException extends ServiceException {
     public AlreadyTakenException() {

@@ -1,7 +1,7 @@
 package dataaccess;
 
 import dataaccess.exception.DataAccessException;
-import dataaccess.records.UserData;
+import records.UserData;
 
 public interface UserDAO extends GeneralDAO {
     void addUser(UserData user) throws DataAccessException;

@@ -1,4 +1,4 @@
-package dataaccess.records;
+package records;
 
 import java.util.UUID;
 

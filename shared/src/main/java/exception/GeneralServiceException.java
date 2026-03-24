@@ -1,4 +1,4 @@
-package server.exception;
+package exception;
 
 public class GeneralServiceException extends ServiceException {
     public GeneralServiceException(String message) {

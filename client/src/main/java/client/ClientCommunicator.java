@@ -1,15 +1,15 @@
 package client;
 
 import com.google.gson.Gson;
-import dataaccess.records.GameData;
-import server.exception.BadRequestException;
-import server.request.CreateGameRequest;
-import server.request.JoinGameRequest;
-import server.request.LoginRequest;
-import server.request.RegisterRequest;
-import server.result.CreateGameResult;
-import server.result.ListGamesResult;
-import server.result.LoginResult;
+import records.GameData;
+import exception.BadRequestException;
+import request.CreateGameRequest;
+import request.JoinGameRequest;
+import request.LoginRequest;
+import request.RegisterRequest;
+import result.CreateGameResult;
+import result.ListGamesResult;
+import result.LoginResult;
 
 import java.rmi.ServerException;
 import java.util.Arrays;

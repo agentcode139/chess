@@ -1,9 +1,9 @@
 package dataaccess;
 
 import dataaccess.exception.DataAccessException;
-import dataaccess.records.AuthData;
-import dataaccess.records.GameData;
-import dataaccess.records.UserData;
+import records.AuthData;
+import records.GameData;
+import records.UserData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

@@ -1,6 +1,6 @@
-package server.result;
+package result;
 
-import dataaccess.records.GameData;
+import records.GameData;
 
 import java.util.Collection;
 

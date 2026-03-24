@@ -3,22 +3,25 @@ package server;
 import dataaccess.*;
 import dataaccess.exception.DataAccessException;
 import dataaccess.exception.UserAlreadyExistsException;
-import dataaccess.records.AuthData;
-import dataaccess.records.GameData;
-import dataaccess.records.UserData;
+import records.AuthData;
+import records.GameData;
+import records.UserData;
+import exception.AlreadyTakenException;
+import exception.BadRequestException;
+import exception.ServiceException;
+import exception.UnauthorizedException;
 import org.mindrot.jbcrypt.BCrypt;
-import server.exception.*;
-import server.request.CreateGameRequest;
-import server.request.JoinGameRequest;
-import server.request.LoginRequest;
-import server.request.RegisterRequest;
-import server.result.CreateGameResult;
-import server.result.ListGamesResult;
-import server.result.LoginResult;
+import request.CreateGameRequest;
+import request.JoinGameRequest;
+import request.LoginRequest;
+import request.RegisterRequest;
+import result.CreateGameResult;
+import result.ListGamesResult;
+import result.LoginResult;
 
 import java.util.Objects;
 
-import static dataaccess.records.AuthData.generateAuth;
+import static records.AuthData.generateAuth;
 
 public class Service {
 
@@ -46,7 +49,7 @@ public class Service {
             }
             return authData;
         } catch (DataAccessException e) {
-            throw new GeneralServiceException(e.getMessage());
+            throw new exception.GeneralServiceException(e.getMessage());
         }
     }
 
@@ -69,7 +72,7 @@ public class Service {
         } catch (UserAlreadyExistsException e){
             throw new AlreadyTakenException();
         } catch (DataAccessException e) {
-            throw new GeneralServiceException(e.getMessage());
+            throw new exception.GeneralServiceException(e.getMessage());
         }
     }
 
@@ -79,7 +82,7 @@ public class Service {
             if (user == null){
                 throw new UnauthorizedException();
             } else if (!BCrypt.checkpw(loginRequest.password(), user.password())) {
-                throw new IncorrectPasswordException();
+                throw new exception.IncorrectPasswordException();
             }
 
             AuthData auth = generateAuth(user.username());
@@ -87,7 +90,7 @@ public class Service {
 
             return new LoginResult(user.username(), auth.authToken());
         } catch (DataAccessException e) {
-            throw new GeneralServiceException(e.getMessage());
+            throw new exception.GeneralServiceException(e.getMessage());
         }
     }
 
@@ -96,7 +99,7 @@ public class Service {
         try {
             authDAO.deleteAuth(authToken);
         } catch (DataAccessException e) {
-            throw new GeneralServiceException(e.getMessage());
+            throw new exception.GeneralServiceException(e.getMessage());
         }
     }
 
@@ -106,7 +109,7 @@ public class Service {
             int gameID = gameDAO.addGame(createGameRequest.gameName());
             return new CreateGameResult(gameID);
         } catch (DataAccessException e) {
-            throw new GeneralServiceException(e.getMessage());
+            throw new exception.GeneralServiceException(e.getMessage());
         }
     }
 
@@ -115,7 +118,7 @@ public class Service {
         try {
             return new ListGamesResult(gameDAO.getAllGames());
         } catch (DataAccessException e) {
-            throw new GeneralServiceException(e.getMessage());
+            throw new exception.GeneralServiceException(e.getMessage());
         }
     }
 
@@ -141,7 +144,7 @@ public class Service {
             }
 
         } catch (DataAccessException e) {
-            throw new GeneralServiceException(e.getMessage());
+            throw new exception.GeneralServiceException(e.getMessage());
         }
     }
 
@@ -151,7 +154,7 @@ public class Service {
             this.authDAO.clear();
             this.gameDAO.clear();
         } catch (DataAccessException e) {
-            throw new GeneralServiceException(e.getMessage());
+            throw new exception.GeneralServiceException(e.getMessage());
         }
     }
 }

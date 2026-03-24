@@ -2,7 +2,7 @@ package dataaccess;
 
 import dataaccess.exception.DataAccessException;
 import dataaccess.exception.NoMatchException;
-import dataaccess.records.AuthData;
+import records.AuthData;
 
 import java.util.HashMap;
 

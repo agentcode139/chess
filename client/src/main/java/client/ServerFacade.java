@@ -1,15 +1,15 @@
 package client;
 
 import com.google.gson.Gson;
-import server.exception.GeneralServiceException;
-import server.exception.ServiceException;
-import server.request.CreateGameRequest;
-import server.request.JoinGameRequest;
-import server.request.LoginRequest;
-import server.request.RegisterRequest;
-import server.result.CreateGameResult;
-import server.result.ListGamesResult;
-import server.result.LoginResult;
+import exception.GeneralServiceException;
+import exception.ServiceException;
+import request.CreateGameRequest;
+import request.JoinGameRequest;
+import request.LoginRequest;
+import request.RegisterRequest;
+import result.CreateGameResult;
+import result.ListGamesResult;
+import result.LoginResult;
 
 import java.net.URI;
 import java.net.http.HttpClient;

@@ -1,9 +1,8 @@
 package dataaccess;
 
-import com.google.gson.Gson;
 import dataaccess.exception.DataAccessException;
 import dataaccess.exception.UserAlreadyExistsException;
-import dataaccess.records.UserData;
+import records.UserData;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
