@@ -2,6 +2,8 @@ package client;
 
 import server.exception.BadRequestException;
 import server.exception.ServiceException;
+import server.request.LoginRequest;
+import server.result.LoginResult;
 
 import java.rmi.ServerException;
 import java.util.Arrays;
@@ -54,51 +56,80 @@ public class ClientCommunicator {
             return switch (uiState) {
                 case PRELOGIN -> switch (cmd) {
                     case "login" -> login(params);
-                    case "register" -> null;//register(params);
+                    case "register" -> register(params);
                     case "quit" -> "quit";
-                    default -> null;//help();
+                    default -> help();
                 };
                 case POSTLOGIN -> switch (cmd) {
-                    case "logout" -> null;
-                    case "create" -> null;
-                    case "list" -> null;
-                    case "join" -> null;
-                    case "observe" -> null;
+                    case "logout" -> logout();
+                    case "create" -> create(params);
+                    case "list" -> list(params);
+                    case "join" -> join(params);
+                    case "observe" -> observe(params);
                     case "quit" -> "quit";
-                    default -> null;//help();
+                    default -> help();
                 };
                 case GAMEPLAY -> switch (cmd) {
                     //Implement in phase 6
                     case "quit" -> "quit";
-                    default -> null;//help();
+                    default -> help();
                 };
             };
-        } catch (ServiceException ex) {
+        } catch (Exception ex) {
             return ex.getMessage();
         }
     }
     // TODO: add calls for all functions
     // register
+    public String register(String... params) throws Exception {
+        return "";
+    }
 
-    public String login(String... params) throws BadRequestException {
-        if (params.length >= 1) {
+    public String login(String... params) throws Exception {
+        if (params.length >= 2) {
             uiState = uiStates.POSTLOGIN;
-            String visitorName = String.join("-", params);
-            //ws.enterPetShop(visitorName);
-            return String.format("You signed in as %s.", visitorName);
+            String username = params[0];
+            LoginResult result = server.login(new LoginRequest(params[0],params[1]));
+            return String.format("You signed in as %s.", username);
         }
         throw new BadRequestException();
     }
 
     // logout
+    public String logout() throws Exception {
+        assert uiState == uiStates.POSTLOGIN;
+        server.logout();
+        uiState = uiStates.PRELOGIN;
+        return "You logged out";
+    }
 
     // create
+    public String create(String... params) throws Exception {
+        assert uiState == uiStates.POSTLOGIN;
+
+        return "";
+    }
 
     // list
+    public String list(String... params) throws Exception {
+        assert uiState == uiStates.POSTLOGIN;
+
+        return "";
+    }
 
     // join
+    public String join(String... params) throws Exception {
+        assert uiState == uiStates.POSTLOGIN;
+
+        return "";
+    }
 
     // observe
+    public String observe(String... params) throws Exception {
+        assert uiState == uiStates.POSTLOGIN;
+
+        return "";
+    }
 
     public String help() {
         return switch (uiState) {

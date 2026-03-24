@@ -1,9 +1,6 @@
 package client;
 
 import com.google.gson.Gson;
-import dataaccess.records.UserData;
-import io.javalin.http.Context;
-import org.jetbrains.annotations.NotNull;
 import server.exception.GeneralServiceException;
 import server.exception.ServiceException;
 import server.request.CreateGameRequest;
@@ -41,9 +38,9 @@ public class ServerFacade {
         return handleResponse(response, LoginResult.class);
     }
 
-    public void logout(LoginRequest loginRequest) throws Exception {
+    public void logout() throws Exception {
         var path = "/session";
-        var request = buildRequest("DELETE", path, loginRequest);
+        var request = buildRequest("DELETE", path, null);
         var response = sendRequest(request);
         handleResponse(response, null);
     }
