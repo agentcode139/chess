@@ -38,9 +38,9 @@ public class ServerFacade {
         return handleResponse(response, LoginResult.class);
     }
 
-    public void logout() throws Exception {
+    public void logout(String token) throws Exception {
         var path = "/session";
-        var request = buildRequest("DELETE", path, null);
+        var request = buildRequest("DELETE", path, token);
         var response = sendRequest(request);
         handleResponse(response, null);
     }
