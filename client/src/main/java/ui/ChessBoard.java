@@ -4,9 +4,7 @@ import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
 
-import javax.print.DocFlavor;
 import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
 
 import static ui.EscapeSequences.*;
 
@@ -20,13 +18,14 @@ public class ChessBoard {
         BLACK
     }
 
-
-    public void drawChessBoard(PrintStream out, chess.ChessBoard board){
+    public void drawChessBoard(PrintStream out, chess.ChessBoard board, ChessGame.TeamColor color){
         //var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         PlaceColor startingColor = PlaceColor.WHITE;
+        //TODO top row
+        drawLetterRow(out, color);
         for (int i = 0; i < BOARD_SIZE; i++){
             drawEmptyChessBoardRow(out,startingColor);
-            drawPieceChessBoardRow(out,startingColor,i,board);
+            drawPieceChessBoardRow(out,startingColor,i,board,color);
             drawEmptyChessBoardRow(out,startingColor);
             // In
             if (startingColor == PlaceColor.WHITE) {
@@ -35,9 +34,13 @@ public class ChessBoard {
                 startingColor = PlaceColor.WHITE;
             }
         }
+        //TODO bottom row
+        drawLetterRow(out, color);
     }
 
-    private void drawPieceChessBoardRow(PrintStream out, PlaceColor color, int i, chess.ChessBoard board) {
+    private void drawPieceChessBoardRow(PrintStream out, PlaceColor color, int i, chess.ChessBoard board, ChessGame.TeamColor team) {
+        setLightGreyWithText(out);
+        out.print((team == ChessGame.TeamColor.WHITE)? i:(7-i));
         for (int j = 0; j<BOARD_SIZE; j++) {
             switch (color) {
                 case PlaceColor.WHITE -> setWhite(out);
@@ -52,11 +55,14 @@ public class ChessBoard {
                 color = PlaceColor.WHITE;
             }
         }
-
+        setLightGreyWithText(out);
+        out.print((team == ChessGame.TeamColor.WHITE)? i:(7-i));
         out.println();
     }
 
     private void drawEmptyChessBoardRow(PrintStream out, PlaceColor color){
+        setLightGreyWithText(out);
+        out.print(" ");
         for (int i = 0; i<BOARD_SIZE; i++) {
             switch (color) {
                 case PlaceColor.WHITE -> setWhite(out);
@@ -69,8 +75,19 @@ public class ChessBoard {
                 color = PlaceColor.WHITE;
             }
         }
-
+        setLightGreyWithText(out);
+        out.print(" ");
         out.println();
+    }
+
+    private void drawLetterRow(PrintStream out, ChessGame.TeamColor color){
+        setLightGreyWithText(out);
+        out.print(" ");
+        for (int c = 0; c < 8; c++){
+            char letter = "abcdefgh".charAt((color == ChessGame.TeamColor.WHITE)? c:(7-c));
+            out.print(EMPTY + letter + " ");
+        }
+        out.print(" ");
     }
 
     private static void setWhite(PrintStream out) {
@@ -80,6 +97,11 @@ public class ChessBoard {
 
     private static void setBlack(PrintStream out) {
         out.print(SET_BG_COLOR_BLACK);
+        out.print(SET_TEXT_COLOR_BLACK);
+    }
+
+    private static void setLightGreyWithText(PrintStream out) {
+        out.print(SET_TEXT_COLOR_LIGHT_GREY);
         out.print(SET_TEXT_COLOR_BLACK);
     }
 

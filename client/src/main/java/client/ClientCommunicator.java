@@ -30,6 +30,7 @@ public class ClientCommunicator {
 
     public ClientCommunicator(String serverUrl) throws ServerException {
         server = new ServerFacade(serverUrl);
+        authtoken = null;
     }
 
     public void run() {
@@ -116,13 +117,13 @@ public class ClientCommunicator {
 
     public String create(String... params) throws Exception {
         assert uiState == uiStates.POSTLOGIN;
-        CreateGameResult result = server.createGame(new CreateGameRequest(params[0]));
+        CreateGameResult result = server.createGame(authtoken, new CreateGameRequest(params[0]));
         return String.format("The Game ID is %d.", result.gameID());
     }
 
     public String list() throws Exception {
         assert uiState == uiStates.POSTLOGIN;
-        ListGamesResult result = server.listGames();
+        ListGamesResult result = server.listGames(authtoken);
         var out = new StringBuilder();
         var gson = new Gson();
         for (GameData game : result.games()) {
@@ -133,7 +134,7 @@ public class ClientCommunicator {
 
     public String join(String... params) throws Exception {
         assert uiState == uiStates.POSTLOGIN;
-        server.joinGame(new JoinGameRequest(params[0], Integer.parseInt(params[1])));
+        server.joinGame(authtoken, new JoinGameRequest(params[0], Integer.parseInt(params[1])));
         return "";
     }
 
