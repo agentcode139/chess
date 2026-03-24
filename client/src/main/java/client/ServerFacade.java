@@ -6,8 +6,12 @@ import io.javalin.http.Context;
 import org.jetbrains.annotations.NotNull;
 import server.exception.GeneralServiceException;
 import server.exception.ServiceException;
+import server.request.CreateGameRequest;
+import server.request.JoinGameRequest;
 import server.request.LoginRequest;
 import server.request.RegisterRequest;
+import server.result.CreateGameResult;
+import server.result.ListGamesResult;
 import server.result.LoginResult;
 
 import java.net.URI;
@@ -23,7 +27,6 @@ public class ServerFacade {
         serverUrl = url;
     }
 
-    // TODO: all functions
     public LoginResult register(RegisterRequest registerRequest) throws Exception {
         var path = "/user";
         var request = buildRequest("POST", path, registerRequest);
@@ -31,7 +34,6 @@ public class ServerFacade {
         return handleResponse(response, LoginResult.class);
     }
 
-    // login
     public LoginResult login(LoginRequest loginRequest) throws Exception {
         var path = "/session";
         var request = buildRequest("POST", path, loginRequest);
@@ -39,15 +41,34 @@ public class ServerFacade {
         return handleResponse(response, LoginResult.class);
     }
 
-    // logout
+    public void logout(LoginRequest loginRequest) throws Exception {
+        var path = "/session";
+        var request = buildRequest("DELETE", path, loginRequest);
+        var response = sendRequest(request);
+        handleResponse(response, null);
+    }
 
-    // createGame
+    public CreateGameResult createGame(CreateGameRequest createGameRequest) throws Exception {
+        var path = "/game";
+        var request = buildRequest("POST", path, createGameRequest);
+        var response = sendRequest(request);
+        return handleResponse(response, CreateGameResult.class);
+    }
 
-    // joinGame
+    public void joinGame(JoinGameRequest joinGameRequest) throws Exception {
+        var path = "/game";
+        var request = buildRequest("PUT", path, joinGameRequest);
+        var response = sendRequest(request);
+        handleResponse(response, CreateGameResult.class);
+    }
 
-    // listGames
+    public ListGamesResult listGames() throws Exception {
+        var path = "/game";
+        var request = buildRequest("GET", path, null);
+        var response = sendRequest(request);
+        return handleResponse(response, ListGamesResult.class);
+    }
 
-    //clear
     public void clear() throws Exception {
         var request = buildRequest("DELETE", "/db", null);
         sendRequest(request);
@@ -85,7 +106,7 @@ public class ServerFacade {
         if (!isSuccessful(status)) {
             var body = response.body();
             if (body != null) {
-                // throw Exception.fromJson(body);
+                throw GeneralServiceException.fromJson(body);
             }
 
             throw new GeneralServiceException("other failure: " + status);
