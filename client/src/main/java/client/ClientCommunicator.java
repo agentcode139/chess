@@ -3,6 +3,7 @@ package client;
 import server.exception.BadRequestException;
 import server.exception.ServiceException;
 import server.request.LoginRequest;
+import server.request.RegisterRequest;
 import server.result.LoginResult;
 
 import java.rmi.ServerException;
@@ -63,7 +64,7 @@ public class ClientCommunicator {
                 case POSTLOGIN -> switch (cmd) {
                     case "logout" -> logout();
                     case "create" -> create(params);
-                    case "list" -> list(params);
+                    case "list" -> list();
                     case "join" -> join(params);
                     case "observe" -> observe(params);
                     case "quit" -> "quit";
@@ -82,15 +83,19 @@ public class ClientCommunicator {
     // TODO: add calls for all functions
     // register
     public String register(String... params) throws Exception {
-        return "";
+        if (params.length >= 3) {
+            uiState = uiStates.POSTLOGIN;
+            LoginResult result = server.register(new RegisterRequest(params[0],params[1],params[2]));
+            return String.format("You signed in as %s.", result.username());
+        }
+        throw new BadRequestException();
     }
 
     public String login(String... params) throws Exception {
         if (params.length >= 2) {
             uiState = uiStates.POSTLOGIN;
-            String username = params[0];
             LoginResult result = server.login(new LoginRequest(params[0],params[1]));
-            return String.format("You signed in as %s.", username);
+            return String.format("You signed in as %s.", result.username());
         }
         throw new BadRequestException();
     }
@@ -111,7 +116,7 @@ public class ClientCommunicator {
     }
 
     // list
-    public String list(String... params) throws Exception {
+    public String list() throws Exception {
         assert uiState == uiStates.POSTLOGIN;
 
         return "";
@@ -133,25 +138,25 @@ public class ClientCommunicator {
 
     public String help() {
         return switch (uiState) {
-            case PRELOGIN -> """
-                    register <USERNAME> <PASSWORD> <EMAIL> - to create an account
-                    login <USERNAME> <PASSWORD> - to play chess
-                    quit - playing chess
-                    help - with possible commands
-                    """;
-            case POSTLOGIN -> """
-                    create <NAME> - a game
-                    list - games
-                    join <ID> [WHITE|BLACK]- a game
-                    observe <ID> - a game
-                    logout - when you are done
-                    quit - playing chess
-                    help - with possible commands
-                    """;
-            case GAMEPLAY -> """
-                    quit - playing chess
-                    help - with possible commands
-                    """;
+            case PRELOGIN ->
+                    SET_TEXT_COLOR_BLUE +
+                    "register <USERNAME> <PASSWORD> <EMAIL> " + SET_TEXT_COLOR_MAGENTA + "- to create an account\n" + SET_TEXT_COLOR_BLUE +
+                    "login <USERNAME> <PASSWORD> " + SET_TEXT_COLOR_MAGENTA + "- to play chess\n" + SET_TEXT_COLOR_BLUE +
+                    "quit " + SET_TEXT_COLOR_MAGENTA + "- playing chess\n" + SET_TEXT_COLOR_BLUE +
+                    "help " + SET_TEXT_COLOR_MAGENTA + "- with possible commands\n" + SET_TEXT_COLOR_BLUE;
+            case POSTLOGIN ->
+                    SET_TEXT_COLOR_BLUE +
+                    "create <NAME> " + SET_TEXT_COLOR_MAGENTA + "- a game\n" + SET_TEXT_COLOR_BLUE +
+                    "list " + SET_TEXT_COLOR_MAGENTA + "- games\n" + SET_TEXT_COLOR_BLUE +
+                    "join <ID> [WHITE|BLACK] " + SET_TEXT_COLOR_MAGENTA + "- a game\n" + SET_TEXT_COLOR_BLUE +
+                    "observe <ID> " + SET_TEXT_COLOR_MAGENTA + "- a game\n" + SET_TEXT_COLOR_BLUE +
+                    "logout " + SET_TEXT_COLOR_MAGENTA + "- when you are done\n" + SET_TEXT_COLOR_BLUE +
+                    "quit " + SET_TEXT_COLOR_MAGENTA + "- playing chess\n" + SET_TEXT_COLOR_BLUE +
+                    "help " + SET_TEXT_COLOR_MAGENTA + "- with possible commands\n" + SET_TEXT_COLOR_BLUE;
+            case GAMEPLAY ->
+                    SET_TEXT_COLOR_BLUE +
+                    "quit " + SET_TEXT_COLOR_MAGENTA + "- playing chess\n" + SET_TEXT_COLOR_BLUE +
+                    "help " + SET_TEXT_COLOR_MAGENTA + "- with possible commands\n" + SET_TEXT_COLOR_BLUE;
         };
     }
 }
