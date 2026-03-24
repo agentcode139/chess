@@ -6,6 +6,7 @@ import dataaccess.records.GameData;
 import server.exception.BadRequestException;
 import server.exception.ServiceException;
 import server.request.CreateGameRequest;
+import server.request.JoinGameRequest;
 import server.request.LoginRequest;
 import server.request.RegisterRequest;
 import server.result.CreateGameResult;
@@ -131,7 +132,7 @@ public class ClientCommunicator {
 
     public String join(String... params) throws Exception {
         assert uiState == uiStates.POSTLOGIN;
-
+        server.joinGame(new JoinGameRequest(params[0], Integer.parseInt(params[1])));
         return "";
     }
 
