@@ -20,7 +20,7 @@ public class ServerFacade {
     private final HttpClient client = HttpClient.newHttpClient();
     private final String serverUrl;
 
-    public ServerFacade(String url){
+    public ServerFacade(String url) {
         serverUrl = url;
     }
 
@@ -67,7 +67,7 @@ public class ServerFacade {
     }
 
     public void clear() throws Exception {
-        var request = buildRequest("DELETE", "/db", null,null);
+        var request = buildRequest("DELETE", "/db", null, null);
         sendRequest(request);
     }
 

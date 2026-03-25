@@ -2,8 +2,8 @@ package client;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
-import records.GameData;
 import exception.BadRequestException;
+import records.GameData;
 import request.CreateGameRequest;
 import request.JoinGameRequest;
 import request.LoginRequest;
@@ -14,7 +14,6 @@ import result.LoginResult;
 
 import java.rmi.ServerException;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
@@ -23,16 +22,16 @@ public class ClientCommunicator {
     private final ServerFacade server;
     // User Info
     private String authtoken;
-    private ChessGame.TeamColor teamColor;
 
-    enum uiStates{
+    enum uiStates {
         PRELOGIN,
         POSTLOGIN,
         GAMEPLAY
     }
+
     private uiStates uiState = uiStates.PRELOGIN;
 
-    public ClientCommunicator(String serverUrl) throws ServerException {
+    public ClientCommunicator(String serverUrl) {
         server = new ServerFacade(serverUrl);
         authtoken = null;
     }
@@ -94,7 +93,7 @@ public class ClientCommunicator {
     public String register(String... params) throws Exception {
         if (params.length >= 3) {
             uiState = uiStates.POSTLOGIN;
-            LoginResult result = server.register(new RegisterRequest(params[0],params[1],params[2]));
+            LoginResult result = server.register(new RegisterRequest(params[0], params[1], params[2]));
             authtoken = result.authToken();
             return String.format("You signed in as %s.", result.username());
         }
@@ -104,7 +103,7 @@ public class ClientCommunicator {
     public String login(String... params) throws Exception {
         if (params.length >= 2) {
             uiState = uiStates.POSTLOGIN;
-            LoginResult result = server.login(new LoginRequest(params[0],params[1]));
+            LoginResult result = server.login(new LoginRequest(params[0], params[1]));
             authtoken = result.authToken();
             return String.format("You signed in as %s.", result.username());
         }
@@ -139,26 +138,26 @@ public class ClientCommunicator {
     public String join(String... params) throws Exception {
         assert uiState == uiStates.POSTLOGIN;
         server.joinGame(authtoken, new JoinGameRequest(params[0], Integer.parseInt(params[1])));
-        teamColor = (Objects.equals(params[0].toUpperCase(), "WHITE"))? ChessGame.TeamColor.WHITE: ChessGame.TeamColor.BLACK;
-        return "";
+        uiState = uiStates.GAMEPLAY;
+        //teamColor = (Objects.equals(params[0].toUpperCase(), "WHITE"))? ChessGame.TeamColor.WHITE: ChessGame.TeamColor.BLACK;
+        return "Joined";
     }
 
     public String observe(String... params) throws Exception {
         assert uiState == uiStates.POSTLOGIN;
-        teamColor = ChessGame.TeamColor.WHITE;
-        return "";
+        //teamColor = ;
+        server.joinGame(authtoken, new JoinGameRequest("WHITE", Integer.parseInt(params[0])));
+        return "Watching";
     }
 
     public String help() {
         return switch (uiState) {
-            case PRELOGIN ->
-                    SET_TEXT_COLOR_BLUE +
+            case PRELOGIN -> SET_TEXT_COLOR_BLUE +
                     "register <USERNAME> <PASSWORD> <EMAIL> " + SET_TEXT_COLOR_MAGENTA + "- to create an account.\n" + SET_TEXT_COLOR_BLUE +
                     "login <USERNAME> <PASSWORD> " + SET_TEXT_COLOR_MAGENTA + "- to play chess.\n" + SET_TEXT_COLOR_BLUE +
                     "quit " + SET_TEXT_COLOR_MAGENTA + "- playing chess.\n" + SET_TEXT_COLOR_BLUE +
                     "help " + SET_TEXT_COLOR_MAGENTA + "- with possible commands." + SET_TEXT_COLOR_BLUE;
-            case POSTLOGIN ->
-                    SET_TEXT_COLOR_BLUE +
+            case POSTLOGIN -> SET_TEXT_COLOR_BLUE +
                     "create <NAME> " + SET_TEXT_COLOR_MAGENTA + "- a game.\n" + SET_TEXT_COLOR_BLUE +
                     "list " + SET_TEXT_COLOR_MAGENTA + "- games.\n" + SET_TEXT_COLOR_BLUE +
                     "join <ID> [WHITE|BLACK] " + SET_TEXT_COLOR_MAGENTA + "- a game.\n" + SET_TEXT_COLOR_BLUE +
@@ -166,8 +165,7 @@ public class ClientCommunicator {
                     "logout " + SET_TEXT_COLOR_MAGENTA + "- when you are done.\n" + SET_TEXT_COLOR_BLUE +
                     "quit " + SET_TEXT_COLOR_MAGENTA + "- playing chess.\n" + SET_TEXT_COLOR_BLUE +
                     "help " + SET_TEXT_COLOR_MAGENTA + "- with possible commands." + SET_TEXT_COLOR_BLUE;
-            case GAMEPLAY ->
-                    SET_TEXT_COLOR_BLUE +
+            case GAMEPLAY -> SET_TEXT_COLOR_BLUE +
                     "quit " + SET_TEXT_COLOR_MAGENTA + "- playing chess.\n" + SET_TEXT_COLOR_BLUE +
                     "help " + SET_TEXT_COLOR_MAGENTA + "- with possible commands." + SET_TEXT_COLOR_BLUE;
         };

@@ -2,6 +2,8 @@
   <dictionary name="project">
     <words>
       <w>authtoken</w>
+      <w>postlogin</w>
+      <w>prelogin</w>
     </words>
   </dictionary>
 </component>
