@@ -2,7 +2,9 @@ package client;
 
 import chess.ChessGame;
 import exception.BadRequestException;
+import exception.GameIDStringException;
 import exception.GeneralServiceException;
+import exception.NotEnoughParamsException;
 import records.GameData;
 import request.CreateGameRequest;
 import request.JoinGameRequest;
@@ -13,9 +15,7 @@ import result.ListGamesResult;
 import result.LoginResult;
 import ui.ChessBoardDisplay;
 
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.Scanner;
+import java.util.*;
 
 import static ui.EscapeSequences.*;
 
@@ -32,6 +32,10 @@ public class ClientCommunicator {
     }
 
     private UIStates uiState = UIStates.PRELOGIN;
+
+    private final Map<Integer, Integer> serverToClientIDs = new HashMap<>();
+    private final Map<Integer, Integer> clientToServerIDs = new HashMap<>();
+    private int addID = 1;
 
     public ClientCommunicator(String serverUrl) {
         server = new ServerFacade(serverUrl);
@@ -93,12 +97,12 @@ public class ClientCommunicator {
 
     public String register(String... params) throws Exception {
         if (params.length >= 3) {
-            uiState = UIStates.POSTLOGIN;
             LoginResult result = server.register(new RegisterRequest(params[0], params[1], params[2]));
+            uiState = UIStates.POSTLOGIN;
             authtoken = result.authToken();
             return String.format("You signed in as %s.", result.username());
         }
-        throw new BadRequestException();
+        throw new NotEnoughParamsException();
     }
 
     public String login(String... params) throws Exception {
@@ -108,7 +112,7 @@ public class ClientCommunicator {
             authtoken = result.authToken();
             return String.format("You signed in as %s.", result.username());
         }
-        throw new BadRequestException();
+        throw new NotEnoughParamsException();
     }
 
     public String logout() throws Exception {
@@ -121,8 +125,20 @@ public class ClientCommunicator {
 
     public String create(String... params) throws Exception {
         assert uiState == UIStates.POSTLOGIN;
-        CreateGameResult result = server.createGame(authtoken, new CreateGameRequest(Arrays.toString(params)));
-        return String.format("The Game ID is %d.", result.gameID());
+        if (params.length >= 1) {
+            StringJoiner paramJoiner = new StringJoiner(" ");
+            for (String param:params){
+                paramJoiner.add(param);
+            }
+            var name = paramJoiner.toString();
+            assert !name.contains("\"");
+            CreateGameResult result = server.createGame(authtoken, new CreateGameRequest(name));
+            serverToClientIDs.put(result.gameID(), addID);
+            clientToServerIDs.put(addID, result.gameID());
+            addID++;
+            return String.format("The Game ID is %d.", addID - 1);
+        }
+        throw new NotEnoughParamsException();
     }
 
     public String list() throws Exception {
@@ -131,8 +147,15 @@ public class ClientCommunicator {
         var out = new StringBuilder();
         out.append(" ID | Game name: White Player, Black Player\n");
         for (GameData game : result.games()) {
+            var printableID = serverToClientIDs.get(game.gameID());
+            if (printableID == null){
+                serverToClientIDs.put(game.gameID(), addID);
+                clientToServerIDs.put(addID, game.gameID());
+                printableID = addID;
+                addID++;
+            }
             out.append(" ")
-                    .append(game.gameID())
+                    .append(printableID)
                     .append(" | ").append(game.gameName())
                     .append(" White player: ").append(game.whiteUsername())
                     .append(" Black player: ").append(game.blackUsername())
@@ -143,25 +166,46 @@ public class ClientCommunicator {
 
     public String join(String... params) throws Exception {
         assert uiState == UIStates.POSTLOGIN;
-        server.joinGame(authtoken, new JoinGameRequest(params[1].toUpperCase(), Integer.parseInt(params[0])));
-        GameData gameData = getGame(Integer.parseInt(params[0]));
-        uiState = UIStates.GAMEPLAY;
-        perspective = (Objects.equals(params[1].toUpperCase(), "WHITE")) ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
-        assert gameData != null;
-        printGame(gameData.game(), perspective);
-        return "Joined";
+        if (params.length >= 2) {
+            try {
+                var id = clientToServerIDs.get(Integer.parseInt(params[0]));
+                if (id == null) {
+                    throw new BadRequestException();
+                }
+                server.joinGame(authtoken, new JoinGameRequest(params[1].toUpperCase(), id));
+                GameData gameData = getGame(id);
+                uiState = UIStates.GAMEPLAY;
+                perspective = (Objects.equals(params[1].toUpperCase(), "WHITE")) ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
+                assert gameData != null;
+                printGame(gameData.game(), perspective);
+                return "Joined";
+            } catch (Exception ignored){
+                throw new GameIDStringException();
+            }
+        }
+        throw new NotEnoughParamsException();
     }
 
     public String observe(String... params) throws Exception {
         assert uiState == UIStates.POSTLOGIN;
         if (params.length >= 1) {
-            GameData gameData = getGame(Integer.parseInt(params[0]));
-            perspective = ChessGame.TeamColor.WHITE;
-            assert gameData != null;
-            printGame(gameData.game(), perspective);
-            return "Watching";
+            try {
+                var inNum = Integer.parseInt(params[0]);
+
+                var id = clientToServerIDs.get(inNum);
+                if (id == null) {
+                    throw new BadRequestException();
+                }
+                GameData gameData = getGame(id);
+                perspective = ChessGame.TeamColor.WHITE;
+                assert gameData != null;
+                printGame(gameData.game(), perspective);
+                return "Watching";
+            } catch (Exception ignore) {
+                throw new GameIDStringException();
+            }
         }
-        throw new BadRequestException();
+        throw new NotEnoughParamsException();
     }
 
     public String help() {

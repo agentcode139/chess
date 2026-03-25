@@ -21,7 +21,7 @@ public class ChessBoardDisplay {
 
     public static void drawChessBoard(chess.ChessBoard board, ChessGame.TeamColor view) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
-        PlaceColor startingColor = PlaceColor.BLACK;
+        PlaceColor startingColor = PlaceColor.WHITE;
         drawLetterRow(out, view);
         for (int i = 0; i < BOARD_SIZE; i++) {
             drawEmptyChessBoardRow(out, startingColor);
@@ -39,7 +39,7 @@ public class ChessBoardDisplay {
 
     private static void drawPieceChessBoardRow(PrintStream out, PlaceColor color, int i, chess.ChessBoard board, ChessGame.TeamColor team) {
         setLightGreyWithText(out);
-        int boardRow = (team == ChessGame.TeamColor.WHITE) ? (i + 1) : (8 - i);
+        int boardRow = (team == ChessGame.TeamColor.BLACK) ? (i + 1) : (8 - i);
         out.print(boardRow);
         for (int j = 0; j < BOARD_SIZE; j++) {
             switch (color) {
@@ -47,7 +47,14 @@ public class ChessBoardDisplay {
                 case PlaceColor.BLACK -> setRed(out);
             }
             out.print(" ");
-            printPiece(out, board.getPiece(new ChessPosition(i + 1, j + 1)));
+            ChessPosition pos;
+            if (team == ChessGame.TeamColor.BLACK){
+                pos = new ChessPosition(i + 1, j + 1);
+            } else {
+                pos = new ChessPosition(8 - i, j + 1);
+            }
+
+            printPiece(out, board.getPiece(pos));
             out.print(" ");
             if (color == PlaceColor.WHITE) {
                 color = PlaceColor.BLACK;
