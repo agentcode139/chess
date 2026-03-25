@@ -1,6 +1,5 @@
 package client;
 
-import chess.ChessGame;
 import com.google.gson.Gson;
 import exception.BadRequestException;
 import records.GameData;
@@ -12,7 +11,6 @@ import result.CreateGameResult;
 import result.ListGamesResult;
 import result.LoginResult;
 
-import java.rmi.ServerException;
 import java.util.Arrays;
 import java.util.Scanner;
 
