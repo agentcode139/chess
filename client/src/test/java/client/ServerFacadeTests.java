@@ -84,6 +84,11 @@ public class ServerFacadeTests {
     }
 
     @Test
+    public void logoutNegative(){
+
+    }
+
+    @Test
     public void loginPositive(){
         assertDoesNotThrow(() -> serverFacade.logout(makeTestUser().authToken()));
 
@@ -94,6 +99,20 @@ public class ServerFacadeTests {
         assertEquals("Tester", result.username());
         assertNotNull(result.authToken());
         assertTrue(result.authToken().length() > 10);
+    }
+
+    @Test
+    public void loginNegativeUsername(){
+        assertDoesNotThrow(() -> serverFacade.logout(makeTestUser().authToken()));
+        LoginRequest request = new LoginRequest("Failure", "123");
+        assertThrows(ServiceException.class, () -> serverFacade.login(request));
+    }
+
+    @Test
+    public void loginNegativePassword(){
+        assertDoesNotThrow(() -> serverFacade.logout(makeTestUser().authToken()));
+        LoginRequest request = new LoginRequest("Tester", "567");
+        assertThrows(ServiceException.class, () -> serverFacade.login(request));
     }
 
     @Test
@@ -117,6 +136,14 @@ public class ServerFacadeTests {
     }
 
     @Test
+    public void joinGameNegative(){
+        LoginResult user = makeTestUser();
+
+        JoinGameRequest request = new JoinGameRequest("WHITE", -1);
+        assertThrows(ServiceException.class,() -> serverFacade.joinGame(user.authToken(),request));
+    }
+
+    @Test
     public void listGamesPositive(){
         LoginResult user = makeTestUser();
         makeTestGame(user.authToken());
@@ -124,6 +151,15 @@ public class ServerFacadeTests {
         ListGamesResult result = assertDoesNotThrow(() -> serverFacade.listGames(user.authToken()));
 
         assertNotNull(result);
+    }
+
+    @Test
+    public void listGamesNone(){
+        LoginResult user = makeTestUser();
+        ListGamesResult result = assertDoesNotThrow(() -> serverFacade.listGames(user.authToken()));
+
+        assertNotNull(result);
+        assert result.games().isEmpty();
     }
 
 
