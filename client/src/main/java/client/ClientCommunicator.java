@@ -1,7 +1,9 @@
 package client;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import exception.BadRequestException;
+import exception.GeneralServiceException;
 import records.GameData;
 import request.CreateGameRequest;
 import request.JoinGameRequest;
@@ -10,8 +12,10 @@ import request.RegisterRequest;
 import result.CreateGameResult;
 import result.ListGamesResult;
 import result.LoginResult;
+import ui.ChessBoardDisplay;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
@@ -20,14 +24,15 @@ public class ClientCommunicator {
     private final ServerFacade server;
     // User Info
     private String authtoken;
+    private ChessGame.TeamColor perspective;
 
-    enum uiStates {
+    enum UIStates {
         PRELOGIN,
         POSTLOGIN,
         GAMEPLAY
     }
 
-    private uiStates uiState = uiStates.PRELOGIN;
+    private UIStates uiState = UIStates.PRELOGIN;
 
     public ClientCommunicator(String serverUrl) {
         server = new ServerFacade(serverUrl);
@@ -44,7 +49,7 @@ public class ClientCommunicator {
 
             try {
                 result = eval(line);
-                System.out.print(SET_TEXT_COLOR_BLUE + result);
+                System.out.print(RESET_BG_COLOR + SET_TEXT_COLOR_BLUE + result);
             } catch (Throwable e) {
                 var msg = e.toString();
                 System.out.print(msg);
@@ -90,7 +95,7 @@ public class ClientCommunicator {
 
     public String register(String... params) throws Exception {
         if (params.length >= 3) {
-            uiState = uiStates.POSTLOGIN;
+            uiState = UIStates.POSTLOGIN;
             LoginResult result = server.register(new RegisterRequest(params[0], params[1], params[2]));
             authtoken = result.authToken();
             return String.format("You signed in as %s.", result.username());
@@ -100,8 +105,8 @@ public class ClientCommunicator {
 
     public String login(String... params) throws Exception {
         if (params.length >= 2) {
-            uiState = uiStates.POSTLOGIN;
             LoginResult result = server.login(new LoginRequest(params[0], params[1]));
+            uiState = UIStates.POSTLOGIN;
             authtoken = result.authToken();
             return String.format("You signed in as %s.", result.username());
         }
@@ -109,21 +114,21 @@ public class ClientCommunicator {
     }
 
     public String logout() throws Exception {
-        assert uiState == uiStates.POSTLOGIN;
+        assert uiState == UIStates.POSTLOGIN;
         server.logout(authtoken);
-        uiState = uiStates.PRELOGIN;
+        uiState = UIStates.PRELOGIN;
         authtoken = null;
         return "You logged out.";
     }
 
     public String create(String... params) throws Exception {
-        assert uiState == uiStates.POSTLOGIN;
+        assert uiState == UIStates.POSTLOGIN;
         CreateGameResult result = server.createGame(authtoken, new CreateGameRequest(params[0]));
         return String.format("The Game ID is %d.", result.gameID());
     }
 
     public String list() throws Exception {
-        assert uiState == uiStates.POSTLOGIN;
+        assert uiState == UIStates.POSTLOGIN;
         ListGamesResult result = server.listGames(authtoken);
         var out = new StringBuilder();
         var gson = new Gson();
@@ -134,18 +139,26 @@ public class ClientCommunicator {
     }
 
     public String join(String... params) throws Exception {
-        assert uiState == uiStates.POSTLOGIN;
-        server.joinGame(authtoken, new JoinGameRequest(params[0], Integer.parseInt(params[1])));
-        uiState = uiStates.GAMEPLAY;
-        //teamColor = (Objects.equals(params[0].toUpperCase(), "WHITE"))? ChessGame.TeamColor.WHITE: ChessGame.TeamColor.BLACK;
+        assert uiState == UIStates.POSTLOGIN;
+        server.joinGame(authtoken, new JoinGameRequest(params[1].toUpperCase(), Integer.parseInt(params[0])));
+        GameData gameData = getGame(Integer.parseInt(params[0]));
+        uiState = UIStates.GAMEPLAY;
+        perspective = (Objects.equals(params[1].toUpperCase(), "WHITE")) ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
+        assert gameData != null;
+        printGame(gameData.game(), perspective);
         return "Joined";
     }
 
     public String observe(String... params) throws Exception {
-        assert uiState == uiStates.POSTLOGIN;
-        //teamColor = ;
-        server.joinGame(authtoken, new JoinGameRequest("WHITE", Integer.parseInt(params[0])));
-        return "Watching";
+        assert uiState == UIStates.POSTLOGIN;
+        if (params.length >= 1) {
+            GameData gameData = getGame(Integer.parseInt(params[0]));
+            perspective = ChessGame.TeamColor.WHITE;
+            assert gameData != null;
+            printGame(gameData.game(), perspective);
+            return "Watching";
+        }
+        throw new BadRequestException();
     }
 
     public String help() {
@@ -167,5 +180,23 @@ public class ClientCommunicator {
                     "quit " + SET_TEXT_COLOR_MAGENTA + "- playing chess.\n" + SET_TEXT_COLOR_BLUE +
                     "help " + SET_TEXT_COLOR_MAGENTA + "- with possible commands." + SET_TEXT_COLOR_BLUE;
         };
+    }
+
+    private GameData getGame(int id) throws GeneralServiceException {
+        try {
+            ListGamesResult listGamesResult = server.listGames(authtoken);
+            for (GameData game : listGamesResult.games()) {
+                if (game.gameID() == id) {
+                    return game;
+                }
+            }
+        } catch (Exception e) {
+            throw new GeneralServiceException(e.getMessage());
+        }
+        return null;
+    }
+
+    private void printGame(ChessGame game, ChessGame.TeamColor view) {
+        ChessBoardDisplay.drawChessBoard(game.getBoard(), view);
     }
 }
