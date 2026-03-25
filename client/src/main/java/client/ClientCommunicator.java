@@ -1,7 +1,6 @@
 package client;
 
 import chess.ChessGame;
-import com.google.gson.Gson;
 import exception.BadRequestException;
 import exception.GeneralServiceException;
 import records.GameData;
@@ -46,7 +45,6 @@ public class ClientCommunicator {
         while (!result.equals("quit")) {
             printPrompt();
             String line = scanner.nextLine();
-
             try {
                 result = eval(line);
                 System.out.print(RESET_BG_COLOR + SET_TEXT_COLOR_BLUE + result);
@@ -83,7 +81,7 @@ public class ClientCommunicator {
                     default -> help();
                 };
                 case GAMEPLAY -> switch (cmd) {
-                    //Implement in phase 6
+                    // Phase 6
                     case "quit" -> "quit";
                     default -> help();
                 };
@@ -123,7 +121,7 @@ public class ClientCommunicator {
 
     public String create(String... params) throws Exception {
         assert uiState == UIStates.POSTLOGIN;
-        CreateGameResult result = server.createGame(authtoken, new CreateGameRequest(params[0]));
+        CreateGameResult result = server.createGame(authtoken, new CreateGameRequest(Arrays.toString(params)));
         return String.format("The Game ID is %d.", result.gameID());
     }
 
@@ -131,9 +129,14 @@ public class ClientCommunicator {
         assert uiState == UIStates.POSTLOGIN;
         ListGamesResult result = server.listGames(authtoken);
         var out = new StringBuilder();
-        var gson = new Gson();
+        out.append(" ID | Game name: White Player, Black Player\n");
         for (GameData game : result.games()) {
-            out.append(gson.toJson(game)).append('\n');
+            out.append(" ")
+                    .append(game.gameID())
+                    .append(" | ").append(game.gameName())
+                    .append(" White player: ").append(game.whiteUsername())
+                    .append(" Black player: ").append(game.blackUsername())
+                    .append("\n");
         }
         return out.toString();
     }
@@ -176,6 +179,7 @@ public class ClientCommunicator {
                     "logout " + SET_TEXT_COLOR_MAGENTA + "- when you are done.\n" + SET_TEXT_COLOR_BLUE +
                     "quit " + SET_TEXT_COLOR_MAGENTA + "- playing chess.\n" + SET_TEXT_COLOR_BLUE +
                     "help " + SET_TEXT_COLOR_MAGENTA + "- with possible commands." + SET_TEXT_COLOR_BLUE;
+            // Phase 6
             case GAMEPLAY -> SET_TEXT_COLOR_BLUE +
                     "quit " + SET_TEXT_COLOR_MAGENTA + "- playing chess.\n" + SET_TEXT_COLOR_BLUE +
                     "help " + SET_TEXT_COLOR_MAGENTA + "- with possible commands." + SET_TEXT_COLOR_BLUE;

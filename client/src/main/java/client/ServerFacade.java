@@ -106,7 +106,9 @@ public class ServerFacade {
         if (!isSuccessful(status)) {
             var body = response.body();
             if (body != null) {
-                throw GeneralServiceException.fromJson(body);
+                String cleanedBody = body.split("\"")[3];
+                cleanedBody = cleanedBody.split(": ")[1];
+                throw GeneralServiceException.fromJson(cleanedBody);
             }
 
             throw new GeneralServiceException("other failure: " + status);

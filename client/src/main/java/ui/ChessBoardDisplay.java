@@ -39,14 +39,15 @@ public class ChessBoardDisplay {
 
     private static void drawPieceChessBoardRow(PrintStream out, PlaceColor color, int i, chess.ChessBoard board, ChessGame.TeamColor team) {
         setLightGreyWithText(out);
-        out.print((team == ChessGame.TeamColor.WHITE) ? (i + 1) : (8 - i));
+        int boardRow = (team == ChessGame.TeamColor.WHITE) ? (i + 1) : (8 - i);
+        out.print(boardRow);
         for (int j = 0; j < BOARD_SIZE; j++) {
             switch (color) {
                 case PlaceColor.WHITE -> setWhite(out);
                 case PlaceColor.BLACK -> setRed(out);
             }
             out.print(" ");
-            printPiece(out, board.getPiece(new ChessPosition(i+1, j+1)));
+            printPiece(out, board.getPiece(new ChessPosition(i + 1, j + 1)));
             out.print(" ");
             if (color == PlaceColor.WHITE) {
                 color = PlaceColor.BLACK;
@@ -55,7 +56,7 @@ public class ChessBoardDisplay {
             }
         }
         setLightGreyWithText(out);
-        out.print((team == ChessGame.TeamColor.WHITE) ? (i + 1) : (8 - i));
+        out.print(boardRow);
         out.println(RESET_BG_COLOR);
     }
 
@@ -103,7 +104,6 @@ public class ChessBoardDisplay {
     }
 
     private static void printPiece(PrintStream out, ChessPiece player) {
-        //out.print(SET_BG_COLOR_WHITE);
         out.print(SET_TEXT_COLOR_BLACK);
         String icon;
         if (player != null) {
@@ -119,6 +119,5 @@ public class ChessBoardDisplay {
             icon = EMPTY;
         }
         out.print(icon);
-        //setWhite(out);
     }
 }
