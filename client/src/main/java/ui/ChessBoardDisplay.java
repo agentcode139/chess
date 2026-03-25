@@ -14,7 +14,6 @@ public class ChessBoardDisplay {
 
     private static final int BOARD_SIZE = 8;
 
-
     enum PlaceColor {
         WHITE,
         BLACK
@@ -22,7 +21,7 @@ public class ChessBoardDisplay {
 
     public static void drawChessBoard(chess.ChessBoard board, ChessGame.TeamColor view) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
-        PlaceColor startingColor = PlaceColor.WHITE;
+        PlaceColor startingColor = PlaceColor.BLACK;
         drawLetterRow(out, view);
         for (int i = 0; i < BOARD_SIZE; i++) {
             drawEmptyChessBoardRow(out, startingColor);
@@ -85,7 +84,7 @@ public class ChessBoardDisplay {
             char letter = "abcdefgh".charAt((color == ChessGame.TeamColor.WHITE) ? c : (7 - c));
             out.print(EMPTY + letter + " ");
         }
-        out.println(" " + RESET_BG_COLOR);
+        out.println("  " + RESET_BG_COLOR);
     }
 
     private static void setWhite(PrintStream out) {
