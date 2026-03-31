@@ -49,7 +49,7 @@ public class ChessBoardDisplay {
             out.print(" ");
             ChessPosition pos;
             if (team == ChessGame.TeamColor.BLACK){
-                pos = new ChessPosition(i + 1, j + 1);
+                pos = new ChessPosition(i + 1, 8 - j);
             } else {
                 pos = new ChessPosition(8 - i, j + 1);
             }

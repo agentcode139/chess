@@ -179,7 +179,7 @@ public class ClientCommunicator {
                 assert gameData != null;
                 printGame(gameData.game(), perspective);
                 return "Joined";
-            } catch (Exception ignored){
+            } catch (Exception ignored) {
                 throw new GameIDStringException();
             }
         }
