@@ -9,7 +9,7 @@ import records.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import server.Service;
+import server.service.Service;
 import exception.ServiceException;
 import request.CreateGameRequest;
 import request.JoinGameRequest;

@@ -16,6 +16,7 @@ import request.RegisterRequest;
 import result.CreateGameResult;
 import result.ListGamesResult;
 import result.LoginResult;
+import server.service.Service;
 
 public class Server {
 
