@@ -9,4 +9,8 @@ public class ErrorMessage extends ServerMessage{
         super(ERROR);
         this.errorMessage = message;
     }
+
+    String getErrorMessage(){
+        return errorMessage;
+    }
 }
