@@ -5,6 +5,7 @@ import exception.BadRequestException;
 import exception.GameIDStringException;
 import exception.GeneralServiceException;
 import exception.NotEnoughParamsException;
+import kotlin.NotImplementedError;
 import records.GameData;
 import request.CreateGameRequest;
 import request.JoinGameRequest;
@@ -86,6 +87,11 @@ public class ClientCommunicator {
                 };
                 case GAMEPLAY -> switch (cmd) {
                     // Phase 6
+                    case "redraw" -> throw new NotImplementedError();
+                    case "leave" -> throw new NotImplementedError();
+                    case "make" -> throw new NotImplementedError();
+                    case "resign" -> throw new NotImplementedError();
+                    case "highlight" -> throw new NotImplementedError();
                     case "quit" -> "quit";
                     default -> help();
                 };
@@ -225,6 +231,11 @@ public class ClientCommunicator {
                     "help " + SET_TEXT_COLOR_MAGENTA + "- with possible commands." + SET_TEXT_COLOR_BLUE;
             // Phase 6
             case GAMEPLAY -> SET_TEXT_COLOR_BLUE +
+                    "redraw" + SET_TEXT_COLOR_MAGENTA + "- chess board.\n" + SET_TEXT_COLOR_BLUE +
+                    "leave" + SET_TEXT_COLOR_MAGENTA + "- the game.\n" + SET_TEXT_COLOR_BLUE +
+                    "make <MOVE>" + SET_TEXT_COLOR_MAGENTA + "- in game.\n" + SET_TEXT_COLOR_BLUE +
+                    "resign" + SET_TEXT_COLOR_MAGENTA + "- from the game.\n" + SET_TEXT_COLOR_BLUE +
+                    "highlight" + SET_TEXT_COLOR_MAGENTA + "- legal move.\n" + SET_TEXT_COLOR_BLUE +
                     "quit " + SET_TEXT_COLOR_MAGENTA + "- playing chess.\n" + SET_TEXT_COLOR_BLUE +
                     "help " + SET_TEXT_COLOR_MAGENTA + "- with possible commands." + SET_TEXT_COLOR_BLUE;
         };
