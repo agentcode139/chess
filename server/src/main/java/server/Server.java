@@ -35,7 +35,15 @@ public class Server {
                 .post("/game", this::createGame)
                 .put("/game", this::joinGame)
                 .delete("/db", this::clear)
-                .exception(ServiceException.class, this::handleException);
+                .exception(ServiceException.class, this::handleException)
+                .ws("/ws",ws -> {
+                    ws.onConnect(ctx -> {
+                        ctx.enableAutomaticPings();
+                        System.out.println("Websocket connected");
+                    });
+                    ws.onMessage(ctx -> ctx.send("WebSocket response:" + ctx.message()));
+                    ws.onClose(ctx -> System.out.println("Websocket closed"));
+                });
     }
 
     public int run(int desiredPort) {
