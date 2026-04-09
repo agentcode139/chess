@@ -1,5 +1,6 @@
 package server.websockets;
 
+import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.Session;
 import websocket.messages.ServerMessage;
 
@@ -8,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ConnectionManager {
     public final ConcurrentHashMap<Session, Session> connections = new ConcurrentHashMap<>();
+    private final Gson gson = new Gson();
 
     public void add(Session session) {
         connections.put(session, session);
@@ -18,7 +20,7 @@ public class ConnectionManager {
     }
 
     public void broadcast(ServerMessage notification) throws IOException {
-        String msg = notification.toString();
+        String msg = gson.toJson(notification);
         for (Session c : connections.values()) {
             if (c.isOpen()) {
                 c.getRemote().sendString(msg);
@@ -27,7 +29,7 @@ public class ConnectionManager {
     }
 
     public void broadcastExecept(Session excludeSession, ServerMessage notification) throws IOException {
-        String msg = notification.toString();
+        String msg = gson.toJson(notification);
         for (Session c : connections.values()) {
             if (c.isOpen()) {
                 if (!c.equals(excludeSession)) {
@@ -38,7 +40,7 @@ public class ConnectionManager {
     }
 
     public void broadcastTo(Session targetSession, ServerMessage notification) throws IOException {
-        String msg = notification.toString();
+        String msg = gson.toJson(notification);
         for (Session c : connections.values()) {
             if (c.isOpen()) {
                 if (c.equals(targetSession)) {
