@@ -85,33 +85,44 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             var notification = new NoticationMessage(username + " has connected to game as " + joinType + ".");
             connections.broadcastExecept(session, notification); //server notification
         } catch (Exception e) {
-            connections.broadcast(new ErrorMessage("Failed to connect."));
+            //connections.broadcast(new ErrorMessage("Failed to connect."));
+            throw new IOException(e.getMessage());
         }
     }
 
     private void makeMove(int gameID) throws IOException {
-        // Server verifies the validity of the move.
+        try {
+            // Server verifies the validity of the move.
+            //GameData gameData = service.getGame(gameID);
+            // Game is updated to represent the move. Game is updated in the database.
 
-        // Game is updated to represent the move. Game is updated in the database.
+            // Server sends a LOAD_GAME message to all clients in the game (including the root client) with an updated game.
 
-        // Server sends a LOAD_GAME message to all clients in the game (including the root client) with an updated game.
+            // Server sends a Notification message to all other clients in that game informing them what move was made.
 
-        // Server sends a Notification message to all other clients in that game informing them what move was made.
-
-        // If the move results in check, checkmate or stalemate the server sends a Notification message to all clients.
-
+            // If the move results in check, checkmate or stalemate the server sends a Notification message to all clients.
+        } catch (Exception e) {
+            throw new IOException(e.getMessage());
+        }
     }
 
     private void leave(String authToken, Session session) throws IOException {
-        // If a player is leaving, then the game is updated to remove the root client. Game is updated in the database.
+        try {
+            // If a player is leaving, then the game is updated to remove the root client. Game is updated in the database.
 
-        // Server sends a Notification message to all other clients in that game informing them that the root client left. This applies to both players and observers.
-
+            // Server sends a Notification message to all other clients in that game informing them that the root client left. This applies to both players and observers.
+        } catch (Exception e) {
+            throw new IOException(e.getMessage());
+        }
     }
     private void resign(int gameID) throws IOException {
-        // Server marks the game as over (no more moves can be made). Game is updated in the database.
+        try {
+            // Server marks the game as over (no more moves can be made). Game is updated in the database.
 
-        // Server sends a Notification message to all clients in that game informing them that the root client resigned. This applies to both players and observers.
+            // Server sends a Notification message to all clients in that game informing them that the root client resigned. This applies to both players and observers.
+        } catch (Exception e) {
+            throw new IOException(e.getMessage());
+        }
 
     }
 }

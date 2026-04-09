@@ -159,21 +159,12 @@ public class Service {
     }
 
     //Data Access
-//    public UserDAO getUserDAO() {
-//        return userDAO;
-//    }
-    public String getUserName(String auth) throws DataAccessException {
-        return userDAO.getUser(auth).username();
+    public String getUserName(String authToken) throws DataAccessException, ServiceException {
+        validateAuthToken(authToken);
+        return this.authDAO.getAuth(authToken).username();
     }
 
-//    public GameDAO getGameDAO() {
-//        return gameDAO;
-//    }
     public GameData getGame(int gameID) throws DataAccessException {
-        return gameDAO.getGame(gameID);
+        return this.gameDAO.getGame(gameID);
     }
-
-//    public AuthDAO getAuthDAO() {
-//        return authDAO;
-//    }
 }
