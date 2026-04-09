@@ -4,7 +4,7 @@ import chess.ChessGame;
 
 import static websocket.messages.ServerMessage.ServerMessageType.LOAD_GAME;
 
-public class LoadGameMessage extends ServerMessage{
+public class LoadGameMessage extends ServerMessage {
     ChessGame game;
 
     public LoadGameMessage(ChessGame game) {
