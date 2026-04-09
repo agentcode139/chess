@@ -17,16 +17,19 @@ import result.CreateGameResult;
 import result.ListGamesResult;
 import result.LoginResult;
 import server.service.Service;
+import server.websockets.WebSocketHandler;
 
 public class Server {
 
     private final Javalin javalin;
     private final Gson gson = new Gson();
     private final Service service;
+    private final WebSocketHandler webSocket;
 
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
         service = new Service();
+        webSocket = new WebSocketHandler(service);
         // Register your endpoints and exception handlers here.
         javalin.post("/user", this::register)
                 .post("/session", this::login)
@@ -37,12 +40,9 @@ public class Server {
                 .delete("/db", this::clear)
                 .exception(ServiceException.class, this::handleException)
                 .ws("/ws",ws -> {
-                    ws.onConnect(ctx -> {
-                        ctx.enableAutomaticPings();
-                        System.out.println("Websocket connected");
-                    });
-                    ws.onMessage(ctx -> ctx.send("WebSocket response:" + ctx.message()));
-                    ws.onClose(ctx -> System.out.println("Websocket closed"));
+                    ws.onConnect(webSocket);
+                    ws.onMessage(webSocket);
+                    ws.onClose(webSocket);
                 });
     }
 

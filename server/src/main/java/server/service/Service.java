@@ -157,4 +157,23 @@ public class Service {
             throw new exception.GeneralServiceException(e.getMessage());
         }
     }
+
+    //Data Access
+//    public UserDAO getUserDAO() {
+//        return userDAO;
+//    }
+    public String getUserName(String auth) throws DataAccessException {
+        return userDAO.getUser(auth).username();
+    }
+
+//    public GameDAO getGameDAO() {
+//        return gameDAO;
+//    }
+    public GameData getGame(int gameID) throws DataAccessException {
+        return gameDAO.getGame(gameID);
+    }
+
+//    public AuthDAO getAuthDAO() {
+//        return authDAO;
+//    }
 }
