@@ -17,11 +17,31 @@ public class ConnectionManager {
         connections.remove(session);
     }
 
-    public void broadcast(Session excludeSession, ServerMessage notification) throws IOException {
+    public void broadcast(ServerMessage notification) throws IOException {
+        String msg = notification.toString();
+        for (Session c : connections.values()) {
+            if (c.isOpen()) {
+                c.getRemote().sendString(msg);
+            }
+        }
+    }
+
+    public void broadcastExecept(Session excludeSession, ServerMessage notification) throws IOException {
         String msg = notification.toString();
         for (Session c : connections.values()) {
             if (c.isOpen()) {
                 if (!c.equals(excludeSession)) {
+                    c.getRemote().sendString(msg);
+                }
+            }
+        }
+    }
+
+    public void broadcastTo(Session targetSession, ServerMessage notification) throws IOException {
+        String msg = notification.toString();
+        for (Session c : connections.values()) {
+            if (c.isOpen()) {
+                if (c.equals(targetSession)) {
                     c.getRemote().sendString(msg);
                 }
             }
