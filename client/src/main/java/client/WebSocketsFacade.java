@@ -30,8 +30,6 @@ public class WebSocketsFacade extends Endpoint {
 
         this.session.addMessageHandler(new MessageHandler.Whole<String>() {
             public void onMessage(String message) {
-//                System.out.println(message);
-//                System.out.println("\nEnter another message you want to echo:");
                 ServerMessage serverNotification = new Gson().fromJson(message, ServerMessage.class);
 //                notificationHandler.notify(notification);
 
@@ -39,8 +37,6 @@ public class WebSocketsFacade extends Endpoint {
         });
 
     }
-
-
 
     @Override
     public void onOpen(Session session, EndpointConfig endpointConfig) {}
