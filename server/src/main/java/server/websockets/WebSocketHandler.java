@@ -2,8 +2,8 @@ package server.websockets;
 
 import chess.ChessGame;
 import chess.ChessMove;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
-import dataaccess.*;
 import io.javalin.websocket.*;
 import org.eclipse.jetty.websocket.api.Session;
 import org.jetbrains.annotations.NotNull;
@@ -14,43 +14,36 @@ import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NoticationMessage;
-import websocket.messages.ServerMessage;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Objects;
 
 public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
     private final ConnectionManager connections;
     private final Service service;
-//    private final UserDAO userDAO;
-//    private final AuthDAO authDAO;
-//    private final GameDAO gameDAO;
+//    private Map<Integer, Collection<Session>> gameSessions;
 
     public WebSocketHandler(Service service) {
-//        this.userDAO = service.getUserDAO();
-//        this.authDAO = service.getAuthDAO();
-//        this.gameDAO = service.getGameDAO();
         this.service = service;
         connections = new ConnectionManager();
     }
 
-    public WebSocketHandler() {
-        this(new Service());
-    }
-
     @Override
     public void handleConnect(@NotNull WsConnectContext ctx) {
-        System.out.println("Websocket connected in Handler");
+        System.out.println("Websocket connected");
         ctx.enableAutomaticPings();
     }
 
     @Override
     public void handleClose(@NotNull WsCloseContext ctx) {
-        System.out.println("Websocket closed in Handler");
+        System.out.println("Websocket closed");
     }
 
     @Override
     public void handleMessage(@NotNull WsMessageContext ctx) {
-        System.out.println("Websocket handling message in Handler");
+        //System.out.println("Websocket handling message in Handler");
         try {
             UserGameCommand userGameCommand = new Gson().fromJson(ctx.message(), UserGameCommand.class);
             switch (userGameCommand.getCommandType()) {
@@ -83,22 +76,41 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             } else {
                 joinType = "observer";
             }
-            var notification = new NoticationMessage(username + " has connected to game as " + joinType + ".");
-            connections.broadcastExecept(session, notification);
+            var notification = new NoticationMessage(username + " has connected to game as " + joinType);
+            connections.broadcastExcept(session, notification);
         } catch (Exception e) {
-            //connections.broadcast(new ErrorMessage("Failed to connect."));
-            throw new IOException(e.getMessage());
+            connections.broadcastTo(session, new ErrorMessage("Failed to connect."));
+            // throw new IOException(e.getMessage());
         }
     }
 
     private void makeMove(MakeMoveCommand makeMoveCommand, Session session) throws IOException {
         try {
-            // Server verifies the validity of the move. TODO
+            // Server verifies the validity of the move.
+            String username = service.getUserName(makeMoveCommand.getAuthToken());
             GameData gameData = service.getGame(makeMoveCommand.getGameID());
             ChessGame game = gameData.game();
             ChessMove move = makeMoveCommand.getMove();
-            game.makeMove(move);
+
+            if (game.getTeamTurn() != game.getBoard().getPiece(move.getStartPosition()).getTeamColor()){
+                throw new InvalidMoveException();
+            }
+            if (game.getTeamTurn() == ChessGame.TeamColor.WHITE){
+                if (!Objects.equals(username, gameData.whiteUsername())){
+                    throw new InvalidMoveException();
+                }
+            } else {
+                if (!Objects.equals(username, gameData.blackUsername())){
+                    throw new InvalidMoveException();
+                }
+            }
+            if (!game.isActive()){
+                throw new InvalidMoveException();
+            }
+
             // Game is updated to represent the move. Game is updated in the database.
+            game.makeMove(move);
+            service.updateGame(gameData);
 
             // Server sends a LOAD_GAME message to all clients in the game (including the root client) with an updated game.
             var loadGame = new LoadGameMessage(gameData.game());
@@ -106,7 +118,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
             // Server sends a Notification message to all other clients in that game informing them what move was made.
             NoticationMessage notificationMove = new NoticationMessage("move " + move.toString() + " was made");
-            connections.broadcastExecept(session, notificationMove);
+            connections.broadcastExcept(session, notificationMove);
 
             // If the move results in check, checkmate or stalemate the server sends a Notification message to all clients.
             NoticationMessage notification = null;
@@ -133,26 +145,48 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 connections.broadcast(notification);
             }
         } catch (Exception e) {
-            throw new IOException(e.getMessage());
+            connections.broadcastTo(session, new ErrorMessage("Bad move"));
+            //throw new IOException(e.getMessage());
         }
     }
 
     private void leave(UserGameCommand userGameCommand, Session session) throws IOException {
         try {
             // If a player is leaving, then the game is updated to remove the root client. Game is updated in the database.
+            String username = service.getUserName(userGameCommand.getAuthToken());
+            GameData gameData = service.getGame(userGameCommand.getGameID());
 
             // Server sends a Notification message to all other clients in that game informing them that the root client left. This applies to both players and observers.
+            connections.broadcastExcept(session,new NoticationMessage(username + " left"));
+            connections.remove(session);
         } catch (Exception e) {
-            throw new IOException(e.getMessage());
+            connections.broadcastTo(session, new ErrorMessage("You can't leave"));
+            //throw new IOException(e.getMessage());
         }
     }
+
     private void resign(UserGameCommand userGameCommand, Session session) throws IOException {
         try {
             // Server marks the game as over (no more moves can be made). Game is updated in the database.
+            String username = service.getUserName(userGameCommand.getAuthToken());
+            GameData gameData = service.getGame(userGameCommand.getGameID());
+            ChessGame game = gameData.game();
+            if (!game.isActive()){
+                throw new InvalidMoveException();
+            }
+            if (!Objects.equals(username, gameData.whiteUsername()) && !Objects.equals(username, gameData.blackUsername())){
+                throw new InvalidMoveException();
+            }
+
+
+            game.setActive(false);
+            service.updateGame(gameData);
 
             // Server sends a Notification message to all clients in that game informing them that the root client resigned. This applies to both players and observers.
+            connections.broadcast(new NoticationMessage(username + " has resigned"));
         } catch (Exception e) {
-            throw new IOException(e.getMessage());
+            connections.broadcastTo(session, new ErrorMessage("Invalid resign"));
+            //throw new IOException(e.getMessage());
         }
 
     }

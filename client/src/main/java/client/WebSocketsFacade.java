@@ -2,6 +2,7 @@ package client;
 
 import com.google.gson.Gson;
 import jakarta.websocket.*;
+import websocket.messages.ServerMessage;
 
 import java.io.IOException;
 import java.net.URI;
@@ -29,9 +30,9 @@ public class WebSocketsFacade extends Endpoint {
 
         this.session.addMessageHandler(new MessageHandler.Whole<String>() {
             public void onMessage(String message) {
-                System.out.println(message);
-                System.out.println("\nEnter another message you want to echo:");
-//                ServerMessage notification = new Gson().fromJson(message, ServerMesage.class);
+//                System.out.println(message);
+//                System.out.println("\nEnter another message you want to echo:");
+                ServerMessage serverNotification = new Gson().fromJson(message, ServerMessage.class);
 //                notificationHandler.notify(notification);
 
             }

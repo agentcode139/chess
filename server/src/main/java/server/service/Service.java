@@ -167,4 +167,7 @@ public class Service {
     public GameData getGame(int gameID) throws DataAccessException {
         return this.gameDAO.getGame(gameID);
     }
+    public void updateGame(GameData gameData) throws DataAccessException {
+        gameDAO.updateGame(gameData);
+    }
 }

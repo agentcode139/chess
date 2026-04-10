@@ -5,6 +5,7 @@ import org.eclipse.jetty.websocket.api.Session;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ConnectionManager {
@@ -27,12 +28,22 @@ public class ConnectionManager {
             }
         }
     }
-
-    public void broadcastExecept(Session excludeSession, ServerMessage notification) throws IOException {
+    public void broadcastExcept(Session excludeSession, ServerMessage notification) throws IOException {
         String msg = gson.toJson(notification);
         for (Session c : connections.values()) {
             if (c.isOpen()) {
                 if (!c.equals(excludeSession)) {
+                    c.getRemote().sendString(msg);
+                }
+            }
+        }
+    }
+
+    public void broadcastInclude(Collection<Session> includeSessions, ServerMessage notification) throws IOException {
+        String msg = gson.toJson(notification);
+        for (Session c : connections.values()) {
+            if (c.isOpen()) {
+                if (includeSessions.contains(c)) {
                     c.getRemote().sendString(msg);
                 }
             }

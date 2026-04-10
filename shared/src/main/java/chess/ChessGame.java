@@ -16,8 +16,10 @@ public class ChessGame {
     ChessBoard chessBoard;
     /* Status Variables */
     TeamColor teamTurn;
+    boolean active;
 
     public ChessGame() {
+        this.active = true;
         // Turn Logic
         this.teamTurn = TeamColor.WHITE;
         // Board Setup
@@ -25,6 +27,13 @@ public class ChessGame {
         this.chessBoard.resetBoard();
     }
 
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
     /**
      * @return Which team's turn it is
      */
