@@ -1,11 +1,10 @@
 package client;
 
 import chess.ChessGame;
+import chess.ChessPosition;
 import exception.BadRequestException;
 import exception.GameIDStringException;
-import exception.GeneralServiceException;
 import exception.NotEnoughParamsException;
-import kotlin.NotImplementedError;
 import records.GameData;
 import request.CreateGameRequest;
 import request.JoinGameRequest;
@@ -16,6 +15,7 @@ import result.ListGamesResult;
 import result.LoginResult;
 import ui.ChessBoardDisplay;
 
+import java.io.IOException;
 import java.util.*;
 
 import static ui.EscapeSequences.*;
@@ -25,6 +25,7 @@ public class ClientCommunicator {
     private final WebSocketsFacade ws;
     // User Info
     private String authtoken;
+    private int joinedGameID;
     private ChessGame.TeamColor perspective;
 
     enum UIStates {
@@ -89,18 +90,17 @@ public class ClientCommunicator {
                     default -> help();
                 };
                 case GAMEPLAY -> switch (cmd) {
-                    // Phase 6
-                    case "redraw" -> throw new NotImplementedError();
-                    case "leave" -> throw new NotImplementedError();
-                    case "make" -> throw new NotImplementedError();
-                    case "resign" -> throw new NotImplementedError();
-                    case "highlight" -> throw new NotImplementedError();
+                    case "redraw" -> redraw();
+                    case "leave" -> leave();
+                    case "make" -> make(params);
+                    case "resign" -> resign();
+                    case "highlight" -> highlight(params);
                     case "quit" -> "quit";
                     default -> help();
                 };
                 case OBSERVE -> switch (cmd) {
-                    case "redraw" -> throw new NotImplementedError();
-                    case "leave" -> throw new NotImplementedError();
+                    case "redraw" -> redraw();
+                    case "leave" -> leave();
                     case "quit" -> "quit";
                     default -> help();
                 };
@@ -108,6 +108,40 @@ public class ClientCommunicator {
         } catch (Exception ex) {
             return ex.getMessage();
         }
+    }
+
+    public String redraw() {
+        ws.printGame(perspective);
+        return "";
+    }
+    public String highlight(String... params) throws NotEnoughParamsException {
+        if (params.length >= 3) {
+            //var out = new StringBuilder();
+            int row = 0;
+            int col = 0;
+            ChessPosition pos = new ChessPosition(row, col);
+            ws.printGame(perspective,pos);
+            return "";
+        }
+        throw new NotEnoughParamsException();
+    }
+
+    public String leave() throws IOException {
+        ws.leave(authtoken, joinedGameID);
+        return "You have left";
+    }
+    public String resign() throws IOException {
+        ws.resign(authtoken, joinedGameID);
+        return "";
+    }
+
+    public String make(String... params) throws Exception {
+      if (params.length >= 3) {
+//        ChessMove
+//        ws.makeMove(authtoken, joinedGameID, move);
+          return "";
+      }
+      throw new NotEnoughParamsException();
     }
 
     public String register(String... params) throws Exception {
@@ -188,11 +222,10 @@ public class ClientCommunicator {
                     throw new BadRequestException();
                 }
                 server.joinGame(authtoken, new JoinGameRequest(params[1].toUpperCase(), id));
-                GameData gameData = getGame(id);
                 uiState = UIStates.GAMEPLAY;
                 perspective = (Objects.equals(params[1].toUpperCase(), "WHITE")) ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
-                assert gameData != null;
-                printGame(gameData.game(), perspective);
+                ws.connect(authtoken,id);
+                joinedGameID = id;
                 return "Joined";
             } catch (Exception ignored) {
                 throw new GameIDStringException();
@@ -211,11 +244,8 @@ public class ClientCommunicator {
                 if (id == null) {
                     throw new BadRequestException();
                 }
-                GameData gameData = getGame(id);
-                perspective = ChessGame.TeamColor.WHITE;
                 uiState = UIStates.OBSERVE;
-                assert gameData != null;
-                printGame(gameData.game(), perspective);
+                ws.connect(authtoken,id);
                 return "Watching";
             } catch (Exception ignore) {
                 throw new GameIDStringException();
@@ -244,7 +274,7 @@ public class ClientCommunicator {
                     "leave" + SET_TEXT_COLOR_MAGENTA + "- the game.\n" + SET_TEXT_COLOR_BLUE +
                     "make <MOVE>" + SET_TEXT_COLOR_MAGENTA + "- in game.\n" + SET_TEXT_COLOR_BLUE +
                     "resign" + SET_TEXT_COLOR_MAGENTA + "- from the game.\n" + SET_TEXT_COLOR_BLUE +
-                    "highlight" + SET_TEXT_COLOR_MAGENTA + "- legal move.\n" + SET_TEXT_COLOR_BLUE +
+                    "highlight <PIECE>" + SET_TEXT_COLOR_MAGENTA + "- legal move.\n" + SET_TEXT_COLOR_BLUE +
                     "quit " + SET_TEXT_COLOR_MAGENTA + "- playing chess.\n" + SET_TEXT_COLOR_BLUE +
                     "help " + SET_TEXT_COLOR_MAGENTA + "- with possible commands." + SET_TEXT_COLOR_BLUE;
             case OBSERVE -> SET_TEXT_COLOR_BLUE +
@@ -253,23 +283,5 @@ public class ClientCommunicator {
                     "quit " + SET_TEXT_COLOR_MAGENTA + "- playing chess.\n" + SET_TEXT_COLOR_BLUE +
                     "help " + SET_TEXT_COLOR_MAGENTA + "- with possible commands." + SET_TEXT_COLOR_BLUE;
         };
-    }
-
-    private GameData getGame(int id) throws GeneralServiceException {
-        try {
-            ListGamesResult listGamesResult = server.listGames(authtoken);
-            for (GameData game : listGamesResult.games()) {
-                if (game.gameID() == id) {
-                    return game;
-                }
-            }
-        } catch (Exception e) {
-            throw new GeneralServiceException(e.getMessage());
-        }
-        return null;
-    }
-
-    private void printGame(ChessGame game, ChessGame.TeamColor view) {
-        ChessBoardDisplay.drawChessBoard(game.getBoard(), view);
     }
 }

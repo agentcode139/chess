@@ -1,11 +1,14 @@
 package ui;
 
+import chess.ChessBoard;
 import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.Set;
 
 import static ui.EscapeSequences.*;
 
@@ -19,14 +22,14 @@ public class ChessBoardDisplay {
         BLACK
     }
 
-    public static void drawChessBoard(chess.ChessBoard board, ChessGame.TeamColor view) {
+    public static void drawChessBoard(chess.ChessBoard board, ChessGame.TeamColor view, Map<Integer, Set<Integer>> highlight) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         PlaceColor startingColor = PlaceColor.WHITE;
         drawLetterRow(out, view);
         for (int i = 0; i < BOARD_SIZE; i++) {
-            drawEmptyChessBoardRow(out, startingColor);
-            drawPieceChessBoardRow(out, startingColor, i, board, view);
-            drawEmptyChessBoardRow(out, startingColor);
+            drawEmptyChessBoardRow(out, startingColor, highlight.get(i));
+            drawPieceChessBoardRow(out, startingColor, i, board, view, highlight.get(i));
+            drawEmptyChessBoardRow(out, startingColor, highlight.get(i));
             // In
             if (startingColor == PlaceColor.WHITE) {
                 startingColor = PlaceColor.BLACK;
@@ -36,15 +39,25 @@ public class ChessBoardDisplay {
         }
         drawLetterRow(out, view);
     }
+    public static void drawChessBoard(chess.ChessBoard board, ChessGame.TeamColor view) {
+        drawChessBoard(board, view,null);
+    }
 
-    private static void drawPieceChessBoardRow(PrintStream out, PlaceColor color, int i, chess.ChessBoard board, ChessGame.TeamColor team) {
+    private static void drawPieceChessBoardRow(PrintStream out, PlaceColor color, int i, ChessBoard board, ChessGame.TeamColor team, Set<Integer> highlight) {
         setLightGreyWithText(out);
         int boardRow = (team == ChessGame.TeamColor.BLACK) ? (i + 1) : (8 - i);
         out.print(boardRow);
         for (int j = 0; j < BOARD_SIZE; j++) {
-            switch (color) {
-                case PlaceColor.WHITE -> setWhite(out);
-                case PlaceColor.BLACK -> setRed(out);
+            if (highlight.contains(i)){
+                switch (color) {
+                    case PlaceColor.WHITE -> setGreen(out);
+                    case PlaceColor.BLACK -> setDarkGreen(out);
+                }
+            } else {
+                switch (color) {
+                    case PlaceColor.WHITE -> setWhite(out);
+                    case PlaceColor.BLACK -> setRed(out);
+                }
             }
             out.print(" ");
             ChessPosition pos;
@@ -67,14 +80,22 @@ public class ChessBoardDisplay {
         out.println(RESET_BG_COLOR);
     }
 
-    private static void drawEmptyChessBoardRow(PrintStream out, PlaceColor color) {
+    private static void drawEmptyChessBoardRow(PrintStream out, PlaceColor color, Set<Integer> highlight) {
         setLightGreyWithText(out);
         out.print(" ");
         for (int i = 0; i < BOARD_SIZE; i++) {
-            switch (color) {
-                case PlaceColor.WHITE -> setWhite(out);
-                case PlaceColor.BLACK -> setRed(out);
+            if (highlight.contains(i)){
+                switch (color) {
+                    case PlaceColor.WHITE -> setGreen(out);
+                    case PlaceColor.BLACK -> setDarkGreen(out);
+                }
+            } else {
+                switch (color) {
+                    case PlaceColor.WHITE -> setWhite(out);
+                    case PlaceColor.BLACK -> setRed(out);
+                }
             }
+
             out.print(" " + EMPTY + " ");
             if (color == PlaceColor.WHITE) {
                 color = PlaceColor.BLACK;
@@ -104,6 +125,17 @@ public class ChessBoardDisplay {
         out.print(SET_BG_COLOR_RED);
         out.print(SET_TEXT_COLOR_BLACK);
     }
+
+    private static void setDarkGreen(PrintStream out) {
+        out.print(SET_BG_COLOR_DARK_GREEN);
+        out.print(SET_TEXT_COLOR_BLACK);
+    }
+
+    private static void setGreen(PrintStream out) {
+        out.print(SET_BG_COLOR_GREEN);
+        out.print(SET_TEXT_COLOR_WHITE);
+    }
+
 
     private static void setLightGreyWithText(PrintStream out) {
         out.print(SET_BG_COLOR_LIGHT_GREY);
