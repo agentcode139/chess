@@ -8,6 +8,7 @@ import io.javalin.websocket.*;
 import org.eclipse.jetty.websocket.api.Session;
 import org.jetbrains.annotations.NotNull;
 import records.GameData;
+import request.JoinGameRequest;
 import server.service.Service;
 import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
@@ -16,18 +17,20 @@ import websocket.messages.LoadGameMessage;
 import websocket.messages.NoticationMessage;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
     private final ConnectionManager connections;
     private final Service service;
-//    private Map<Integer, Collection<Session>> gameSessions;
+    private Map<Integer, Set<Session>> gameClients;
 
     public WebSocketHandler(Service service) {
         this.service = service;
         connections = new ConnectionManager();
+        this.gameClients = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -69,18 +72,19 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
             // Server sends a Notification message to all other clients in that game informing them the root client connected to the game, either as a player (in which case their color must be specified) or as an observer.
             String joinType;
-            if (username.equals(gameData.blackUsername())) {
+            if (gameData.blackUsername() != null && username.equals(gameData.blackUsername())) {
                 joinType = "black player";
-            } else if (username.equals(gameData.whiteUsername())) {
+            } else if (gameData.whiteUsername() != null && username.equals(gameData.whiteUsername())) {
                 joinType = "white player";
             } else {
                 joinType = "observer";
             }
+            gameClients.computeIfAbsent(userGameCommand.getGameID(), k -> ConcurrentHashMap.newKeySet()).add(session);
+
             var notification = new NoticationMessage(username + " has connected to game as " + joinType);
-            connections.broadcastExcept(session, notification);
+            connections.broadcastExclusiveInclude(session,gameClients.get(userGameCommand.getGameID()), notification);
         } catch (Exception e) {
-            connections.broadcastTo(session, new ErrorMessage("Failed to connect."));
-            // throw new IOException(e.getMessage());
+            connections.broadcastTo(session, new ErrorMessage("Failed Connect:" + e.getMessage()));
         }
     }
 
@@ -114,11 +118,11 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
             // Server sends a LOAD_GAME message to all clients in the game (including the root client) with an updated game.
             var loadGame = new LoadGameMessage(gameData.game());
-            connections.broadcast(loadGame);
+            connections.broadcastExclusiveInclude(null, gameClients.get(makeMoveCommand.getGameID()), loadGame);
 
             // Server sends a Notification message to all other clients in that game informing them what move was made.
             NoticationMessage notificationMove = new NoticationMessage("move " + move.toString() + " was made");
-            connections.broadcastExcept(session, notificationMove);
+            connections.broadcastExclusiveInclude(session, gameClients.get(makeMoveCommand.getGameID()), notificationMove);
 
             // If the move results in check, checkmate or stalemate the server sends a Notification message to all clients.
             NoticationMessage notification = null;
@@ -145,8 +149,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 connections.broadcast(notification);
             }
         } catch (Exception e) {
-            connections.broadcastTo(session, new ErrorMessage("Bad move"));
-            //throw new IOException(e.getMessage());
+            connections.broadcastTo(session, new ErrorMessage("Bad Move:" + e.getMessage()));
         }
     }
 
@@ -156,12 +159,18 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             String username = service.getUserName(userGameCommand.getAuthToken());
             GameData gameData = service.getGame(userGameCommand.getGameID());
 
-            // Server sends a Notification message to all other clients in that game informing them that the root client left. This applies to both players and observers.
-            connections.broadcastExcept(session,new NoticationMessage(username + " left"));
+            Set<Session> clients = gameClients.getOrDefault(userGameCommand.getGameID(), ConcurrentHashMap.newKeySet());
+            clients.remove(session);
+            String playerColor = (Objects.equals(gameData.whiteUsername(), username))? "WHITE":"BLACK";
+            service.leaveGame(userGameCommand.getAuthToken(), new JoinGameRequest(playerColor, userGameCommand.getGameID()) );
+
+            // Server sends a Notification message to all other clients in that game informing them that the root client left. This applies to both players and observers
+            connections.broadcastExclusiveInclude(session,
+                    gameClients.get(userGameCommand.getGameID()),
+                    new NoticationMessage(username + " left " + gameData.gameName()));
             connections.remove(session);
         } catch (Exception e) {
-            connections.broadcastTo(session, new ErrorMessage("You can't leave"));
-            //throw new IOException(e.getMessage());
+            connections.broadcastTo(session, new ErrorMessage("You can't leave:" + e.getMessage()));
         }
     }
 
@@ -178,15 +187,15 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 throw new InvalidMoveException();
             }
 
-
             game.setActive(false);
             service.updateGame(gameData);
 
             // Server sends a Notification message to all clients in that game informing them that the root client resigned. This applies to both players and observers.
-            connections.broadcast(new NoticationMessage(username + " has resigned"));
+            connections.broadcastExclusiveInclude(null,
+                    gameClients.get(userGameCommand.getGameID()),
+                    new NoticationMessage(username + " has resigned"));
         } catch (Exception e) {
-            connections.broadcastTo(session, new ErrorMessage("Invalid resign"));
-            //throw new IOException(e.getMessage());
+            connections.broadcastTo(session, new ErrorMessage("Failed resign:" + e.getMessage()));
         }
 
     }

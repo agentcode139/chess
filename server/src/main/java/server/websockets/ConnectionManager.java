@@ -39,11 +39,11 @@ public class ConnectionManager {
         }
     }
 
-    public void broadcastInclude(Collection<Session> includeSessions, ServerMessage notification) throws IOException {
+    public void broadcastExclusiveInclude(Session excludeSession, Collection<Session> includeSessions, ServerMessage notification) throws IOException {
         String msg = gson.toJson(notification);
         for (Session c : connections.values()) {
             if (c.isOpen()) {
-                if (includeSessions.contains(c)) {
+                if (includeSessions.contains(c) && !c.equals(excludeSession)) {
                     c.getRemote().sendString(msg);
                 }
             }
@@ -52,12 +52,8 @@ public class ConnectionManager {
 
     public void broadcastTo(Session targetSession, ServerMessage notification) throws IOException {
         String msg = gson.toJson(notification);
-        for (Session c : connections.values()) {
-            if (c.isOpen()) {
-                if (c.equals(targetSession)) {
-                    c.getRemote().sendString(msg);
-                }
-            }
+        if (targetSession.isOpen()){
+            targetSession.getRemote().sendString(msg);
         }
     }
 }

@@ -213,6 +213,7 @@ public class ClientCommunicator {
                 }
                 GameData gameData = getGame(id);
                 perspective = ChessGame.TeamColor.WHITE;
+                uiState = UIStates.OBSERVE;
                 assert gameData != null;
                 printGame(gameData.game(), perspective);
                 return "Watching";

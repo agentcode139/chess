@@ -148,6 +148,26 @@ public class Service {
         }
     }
 
+    public void leaveGame(String authToken, JoinGameRequest leaveGameRequest) throws ServiceException {
+        validateAuthToken(authToken);
+        try {
+            GameData game = gameDAO.getGame(leaveGameRequest.gameID());
+            if (game == null) {
+                throw new BadRequestException();
+            }
+            if (Objects.equals(leaveGameRequest.playerColor(), "WHITE")) {
+                gameDAO.updateGame(new GameData(game.gameID(), game.gameName(), null, game.blackUsername(), game.game()));
+            } else if (Objects.equals(leaveGameRequest.playerColor(), "BLACK")) {
+                gameDAO.updateGame(new GameData(game.gameID(), game.gameName(), game.whiteUsername(), null, game.game()));
+            } else {
+                throw new BadRequestException();
+            }
+
+        } catch (DataAccessException e) {
+            throw new exception.GeneralServiceException(e.getMessage());
+        }
+    }
+
     public void clearData() throws ServiceException {
         try {
             this.userDAO.clear();
@@ -159,8 +179,7 @@ public class Service {
     }
 
     //Data Access
-    public String getUserName(String authToken) throws DataAccessException, ServiceException {
-        validateAuthToken(authToken);
+    public String getUserName(String authToken) throws DataAccessException {
         return this.authDAO.getAuth(authToken).username();
     }
 
