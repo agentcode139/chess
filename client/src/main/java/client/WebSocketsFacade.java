@@ -48,11 +48,9 @@ public class WebSocketsFacade extends Endpoint {
         this.session.addMessageHandler(new MessageHandler.Whole<String>() {
             public void onMessage(String message) {
                 ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
-//                notificationHandler.notify(notification);
-                //ServerMessage userGameCommand = new Gson().fromJson(ctx.message(), ServerMessage.class);
                 switch (serverMessage.getServerMessageType()) {
                     case LOAD_GAME -> {
-                        load_game(new Gson().fromJson(message, LoadGameMessage.class));
+                        loadGame(new Gson().fromJson(message, LoadGameMessage.class));
                     }
                     case ERROR -> {
                         errorHandle(new Gson().fromJson(message, ErrorMessage.class));
@@ -67,7 +65,7 @@ public class WebSocketsFacade extends Endpoint {
 
     }
 
-    private void load_game(LoadGameMessage loadGameMessage) {
+    private void loadGame(LoadGameMessage loadGameMessage) {
         game = loadGameMessage.getChessGame();
     }
 
@@ -98,9 +96,6 @@ public class WebSocketsFacade extends Endpoint {
                 new UserGameCommand(UserGameCommand.CommandType.CONNECT, authtoken, gameID)
         );
         session.getBasicRemote().sendText(message);
-
-//        ChessGame.TeamColor perspective = (Objects.equals(team.toUpperCase(), "WHITE")) ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
-//        printGame(perspective);
     }
 
     public void makeMove(String authtoken, int gameID, ChessMove move) throws IOException {

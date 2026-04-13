@@ -171,7 +171,9 @@ public class ClientCommunicator {
             } else {
                 promo = null;
             }
-            ChessMove move = new ChessMove(stringToPos(params[0].toLowerCase()), stringToPos(params[1].toLowerCase()), promo);
+            ChessMove move = new ChessMove(stringToPos(params[0].toLowerCase()),
+                    stringToPos(params[1].toLowerCase()),
+                    promo);
             ws.makeMove(authtoken, joinedGameID, move);
             return redraw();
         }
@@ -292,7 +294,8 @@ public class ClientCommunicator {
     public String help() {
         return switch (uiState) {
             case PRELOGIN -> SET_TEXT_COLOR_BLUE +
-                    "register <USERNAME> <PASSWORD> <EMAIL> " + SET_TEXT_COLOR_MAGENTA + "- to create an account.\n" + SET_TEXT_COLOR_BLUE +
+                    "register <USERNAME> <PASSWORD> <EMAIL> " + SET_TEXT_COLOR_MAGENTA + "- to create an account.\n" +
+                    SET_TEXT_COLOR_BLUE +
                     "login <USERNAME> <PASSWORD> " + SET_TEXT_COLOR_MAGENTA + "- to play chess.\n" + SET_TEXT_COLOR_BLUE +
                     "quit " + SET_TEXT_COLOR_MAGENTA + "- playing chess.\n" + SET_TEXT_COLOR_BLUE +
                     "help " + SET_TEXT_COLOR_MAGENTA + "- with possible commands." + SET_TEXT_COLOR_BLUE;
