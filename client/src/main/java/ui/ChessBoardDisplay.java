@@ -45,7 +45,12 @@ public class ChessBoardDisplay {
         drawChessBoard(board, view, new ConcurrentHashMap<>());
     }
 
-    private static void drawPieceChessBoardRow(PrintStream out, PlaceColor color, int i, ChessBoard board, ChessGame.TeamColor team, Set<Integer> highlight) {
+    private static void drawPieceChessBoardRow(PrintStream out,
+                                               PlaceColor color,
+                                               int i,
+                                               ChessBoard board,
+                                               ChessGame.TeamColor team,
+                                               Set<Integer> highlight) {
         setLightGreyWithText(out);
         int boardRow = (team == ChessGame.TeamColor.BLACK) ? (i + 1) : (8 - i);
         out.print(boardRow);
