@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
     private final ConnectionManager connections;
     private final Service service;
-    private Map<Integer, Set<Session>> gameClients;
+    private final Map<Integer, Set<Session>> gameClients;
 
     public WebSocketHandler(Service service) {
         this.service = service;
@@ -82,7 +82,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             gameClients.computeIfAbsent(userGameCommand.getGameID(), k -> ConcurrentHashMap.newKeySet()).add(session);
 
             var notification = new NoticationMessage(username + " has connected to game as " + joinType);
-            connections.broadcastExclusiveInclude(session,gameClients.get(userGameCommand.getGameID()), notification);
+            connections.broadcastExclusiveInclude(session, gameClients.get(userGameCommand.getGameID()), notification);
         } catch (Exception e) {
             connections.broadcastTo(session, new ErrorMessage("Failed Connect:" + e.getMessage()));
         }
@@ -96,19 +96,19 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             ChessGame game = gameData.game();
             ChessMove move = makeMoveCommand.getMove();
 
-            if (game.getTeamTurn() != game.getBoard().getPiece(move.getStartPosition()).getTeamColor()){
+            if (game.getTeamTurn() != game.getBoard().getPiece(move.getStartPosition()).getTeamColor()) {
                 throw new InvalidMoveException();
             }
-            if (game.getTeamTurn() == ChessGame.TeamColor.WHITE){
-                if (!Objects.equals(username, gameData.whiteUsername())){
+            if (game.getTeamTurn() == ChessGame.TeamColor.WHITE) {
+                if (!Objects.equals(username, gameData.whiteUsername())) {
                     throw new InvalidMoveException();
                 }
             } else {
-                if (!Objects.equals(username, gameData.blackUsername())){
+                if (!Objects.equals(username, gameData.blackUsername())) {
                     throw new InvalidMoveException();
                 }
             }
-            if (!game.isActive()){
+            if (!game.isActive()) {
                 throw new InvalidMoveException();
             }
 
@@ -121,27 +121,27 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             connections.broadcastExclusiveInclude(null, gameClients.get(makeMoveCommand.getGameID()), loadGame);
 
             // Server sends a Notification message to all other clients in that game informing them what move was made.
-            NoticationMessage notificationMove = new NoticationMessage("move " + move.toString() + " was made");
+            NoticationMessage notificationMove = new NoticationMessage("move " + move + " was made");
             connections.broadcastExclusiveInclude(session, gameClients.get(makeMoveCommand.getGameID()), notificationMove);
 
             // If the move results in check, checkmate or stalemate the server sends a Notification message to all clients.
             NoticationMessage notification = null;
-            if (game.isInCheck(ChessGame.TeamColor.WHITE)){
+            if (game.isInCheck(ChessGame.TeamColor.WHITE)) {
                 notification = new NoticationMessage("White is in check");
             }
-            if (game.isInCheck(ChessGame.TeamColor.BLACK)){
+            if (game.isInCheck(ChessGame.TeamColor.BLACK)) {
                 notification = new NoticationMessage("Black is in check");
             }
-            if (game.isInCheckmate(ChessGame.TeamColor.WHITE)){
+            if (game.isInCheckmate(ChessGame.TeamColor.WHITE)) {
                 notification = new NoticationMessage("White is in checkmate");
             }
-            if (game.isInCheckmate(ChessGame.TeamColor.BLACK)){
+            if (game.isInCheckmate(ChessGame.TeamColor.BLACK)) {
                 notification = new NoticationMessage("Black is in checkmate");
             }
-            if (game.isInStalemate(ChessGame.TeamColor.WHITE)){
+            if (game.isInStalemate(ChessGame.TeamColor.WHITE)) {
                 notification = new NoticationMessage("White is in stalemate");
             }
-            if (game.isInStalemate(ChessGame.TeamColor.BLACK)){
+            if (game.isInStalemate(ChessGame.TeamColor.BLACK)) {
                 notification = new NoticationMessage("Black is in stalemate");
             }
 
@@ -161,8 +161,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
             Set<Session> clients = gameClients.getOrDefault(userGameCommand.getGameID(), ConcurrentHashMap.newKeySet());
             clients.remove(session);
-            String playerColor = (Objects.equals(gameData.whiteUsername(), username))? "WHITE":"BLACK";
-            service.leaveGame(userGameCommand.getAuthToken(), new JoinGameRequest(playerColor, userGameCommand.getGameID()) );
+            String playerColor = (Objects.equals(gameData.whiteUsername(), username)) ? "WHITE" : "BLACK";
+            service.leaveGame(userGameCommand.getAuthToken(), new JoinGameRequest(playerColor, userGameCommand.getGameID()));
 
             // Server sends a Notification message to all other clients in that game informing them that the root client left. This applies to both players and observers
             connections.broadcastExclusiveInclude(session,
@@ -180,10 +180,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             String username = service.getUserName(userGameCommand.getAuthToken());
             GameData gameData = service.getGame(userGameCommand.getGameID());
             ChessGame game = gameData.game();
-            if (!game.isActive()){
+            if (!game.isActive()) {
                 throw new InvalidMoveException();
             }
-            if (!Objects.equals(username, gameData.whiteUsername()) && !Objects.equals(username, gameData.blackUsername())){
+            if (!Objects.equals(username, gameData.whiteUsername()) && !Objects.equals(username, gameData.blackUsername())) {
                 throw new InvalidMoveException();
             }
 

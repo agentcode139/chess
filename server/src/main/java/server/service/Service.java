@@ -3,14 +3,14 @@ package server.service;
 import dataaccess.*;
 import dataaccess.exception.DataAccessException;
 import dataaccess.exception.UserAlreadyExistsException;
-import records.AuthData;
-import records.GameData;
-import records.UserData;
 import exception.AlreadyTakenException;
 import exception.BadRequestException;
 import exception.ServiceException;
 import exception.UnauthorizedException;
 import org.mindrot.jbcrypt.BCrypt;
+import records.AuthData;
+import records.GameData;
+import records.UserData;
 import request.CreateGameRequest;
 import request.JoinGameRequest;
 import request.LoginRequest;
@@ -58,7 +58,7 @@ public class Service {
                 BCrypt.hashpw(registerRequest.password(), BCrypt.gensalt()),
                 registerRequest.email());
 
-        if (newUser.username() == null || newUser.password() == null){
+        if (newUser.username() == null || newUser.password() == null) {
             throw new UnauthorizedException();
         }
 
@@ -69,7 +69,7 @@ public class Service {
             authDAO.addAuth(auth);
 
             return new LoginResult(auth.username(), auth.authToken());
-        } catch (UserAlreadyExistsException e){
+        } catch (UserAlreadyExistsException e) {
             throw new AlreadyTakenException();
         } catch (DataAccessException e) {
             throw new exception.GeneralServiceException(e.getMessage());
@@ -79,7 +79,7 @@ public class Service {
     public LoginResult loginUser(LoginRequest loginRequest) throws ServiceException {
         try {
             UserData user = userDAO.getUser(loginRequest.username());
-            if (user == null){
+            if (user == null) {
                 throw new UnauthorizedException();
             } else if (!BCrypt.checkpw(loginRequest.password(), user.password())) {
                 throw new exception.IncorrectPasswordException();
@@ -186,6 +186,7 @@ public class Service {
     public GameData getGame(int gameID) throws DataAccessException {
         return this.gameDAO.getGame(gameID);
     }
+
     public void updateGame(GameData gameData) throws DataAccessException {
         gameDAO.updateGame(gameData);
     }

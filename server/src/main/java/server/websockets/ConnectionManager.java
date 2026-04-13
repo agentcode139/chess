@@ -28,6 +28,7 @@ public class ConnectionManager {
             }
         }
     }
+
     public void broadcastExcept(Session excludeSession, ServerMessage notification) throws IOException {
         String msg = gson.toJson(notification);
         for (Session c : connections.values()) {
@@ -52,7 +53,7 @@ public class ConnectionManager {
 
     public void broadcastTo(Session targetSession, ServerMessage notification) throws IOException {
         String msg = gson.toJson(notification);
-        if (targetSession.isOpen()){
+        if (targetSession.isOpen()) {
             targetSession.getRemote().sendString(msg);
         }
     }

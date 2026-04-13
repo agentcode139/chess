@@ -115,9 +115,10 @@ public class ClientCommunicator {
         ws.printGame(perspective);
         return "";
     }
+
     public String highlight(String... params) throws NotEnoughParamsException, BadRequestException {
         if (params.length >= 1) {
-            ws.printGame(perspective,stringToPos(params[0].toLowerCase()));
+            ws.printGame(perspective, stringToPos(params[0].toLowerCase()));
             return "";
         }
         throw new NotEnoughParamsException();
@@ -128,6 +129,7 @@ public class ClientCommunicator {
         uiState = UIStates.POSTLOGIN;
         return "You have left";
     }
+
     public String resign() throws IOException {
         ws.resign(authtoken, joinedGameID);
         return "You have resigned";
@@ -135,7 +137,7 @@ public class ClientCommunicator {
 
     private ChessPosition stringToPos(String str) throws BadRequestException {
         assert str.length() == 2;
-        int row = switch (str.charAt(1)){
+        int row = switch (str.charAt(1)) {
             case 'a' -> 1;
             case 'b' -> 2;
             case 'c' -> 3;
@@ -149,32 +151,31 @@ public class ClientCommunicator {
         int col = str.charAt(0) - '0';
         assert 0 < col && col < 9;
 
-        return new ChessPosition(row,col);
+        return new ChessPosition(row, col);
     }
 
     public String make(String... params) throws Exception {
-      if (params.length >= 2) {
+        if (params.length >= 2) {
 
-        ChessPiece.PieceType promo;
-        if (params.length >= 3) {
-            promo = switch (params[2].toLowerCase()) {
-                case "pawn" -> ChessPiece.PieceType.PAWN;
-                case "king" -> ChessPiece.PieceType.KING;
-                case "queen" -> ChessPiece.PieceType.QUEEN;
-                case "knight" -> ChessPiece.PieceType.KNIGHT;
-                case "bishop" -> ChessPiece.PieceType.BISHOP;
-                case "rook" -> ChessPiece.PieceType.ROOK;
-                default -> null;
-            };
-        } else {
-            promo = null;
+            ChessPiece.PieceType promo;
+            if (params.length >= 3) {
+                promo = switch (params[2].toLowerCase()) {
+                    case "pawn" -> ChessPiece.PieceType.PAWN;
+                    case "king" -> ChessPiece.PieceType.KING;
+                    case "queen" -> ChessPiece.PieceType.QUEEN;
+                    case "knight" -> ChessPiece.PieceType.KNIGHT;
+                    case "bishop" -> ChessPiece.PieceType.BISHOP;
+                    case "rook" -> ChessPiece.PieceType.ROOK;
+                    default -> null;
+                };
+            } else {
+                promo = null;
+            }
+            ChessMove move = new ChessMove(stringToPos(params[0].toLowerCase()), stringToPos(params[1].toLowerCase()), promo);
+            ws.makeMove(authtoken, joinedGameID, move);
+            return redraw();
         }
-        ChessMove move = new ChessMove(stringToPos(params[0].toLowerCase()),stringToPos(params[1].toLowerCase()),promo);
-        ws.makeMove(authtoken, joinedGameID, move);
-          //redraw();
-          return "";
-      }
-      throw new NotEnoughParamsException();
+        throw new NotEnoughParamsException();
     }
 
     public String register(String... params) throws Exception {
@@ -209,7 +210,7 @@ public class ClientCommunicator {
         assert uiState == UIStates.POSTLOGIN;
         if (params.length >= 1) {
             StringJoiner paramJoiner = new StringJoiner(" ");
-            for (String param:params){
+            for (String param : params) {
                 paramJoiner.add(param);
             }
             var name = paramJoiner.toString();
@@ -230,7 +231,7 @@ public class ClientCommunicator {
         out.append(" ID | Game name: White Player, Black Player\n");
         for (GameData game : result.games()) {
             var printableID = serverToClientIDs.get(game.gameID());
-            if (printableID == null){
+            if (printableID == null) {
                 serverToClientIDs.put(game.gameID(), addID);
                 clientToServerIDs.put(addID, game.gameID());
                 printableID = addID;
@@ -257,10 +258,9 @@ public class ClientCommunicator {
                 server.joinGame(authtoken, new JoinGameRequest(params[1].toUpperCase(), id));
                 uiState = UIStates.GAMEPLAY;
                 perspective = (Objects.equals(params[1].toUpperCase(), "WHITE")) ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
-                ws.connect(authtoken,id);
+                ws.connect(authtoken, id);
                 joinedGameID = id;
-                //redraw();
-                return "Joined";
+                return "Joined" + redraw();
             } catch (Exception ignored) {
                 throw new GameIDStringException();
             }
@@ -279,7 +279,7 @@ public class ClientCommunicator {
                     throw new BadRequestException();
                 }
                 uiState = UIStates.OBSERVE;
-                ws.connect(authtoken,id);
+                ws.connect(authtoken, id);
                 redraw();
                 return "Watching";
             } catch (Exception ignore) {
@@ -307,9 +307,9 @@ public class ClientCommunicator {
             case GAMEPLAY -> SET_TEXT_COLOR_BLUE +
                     "redraw" + SET_TEXT_COLOR_MAGENTA + "- chess board.\n" + SET_TEXT_COLOR_BLUE +
                     "leave" + SET_TEXT_COLOR_MAGENTA + "- the game.\n" + SET_TEXT_COLOR_BLUE +
-                    "make <MOVE>" + SET_TEXT_COLOR_MAGENTA + "- in game.\n" + SET_TEXT_COLOR_BLUE +
+                    "make <STARTPOS> <ENDPOS>" + SET_TEXT_COLOR_MAGENTA + "- in game.\n" + SET_TEXT_COLOR_BLUE +
                     "resign" + SET_TEXT_COLOR_MAGENTA + "- from the game.\n" + SET_TEXT_COLOR_BLUE +
-                    "highlight <PIECE>" + SET_TEXT_COLOR_MAGENTA + "- legal move.\n" + SET_TEXT_COLOR_BLUE +
+                    "highlight <POS>" + SET_TEXT_COLOR_MAGENTA + "- legal move.\n" + SET_TEXT_COLOR_BLUE +
                     "quit " + SET_TEXT_COLOR_MAGENTA + "- playing chess.\n" + SET_TEXT_COLOR_BLUE +
                     "help " + SET_TEXT_COLOR_MAGENTA + "- with possible commands." + SET_TEXT_COLOR_BLUE;
             case OBSERVE -> SET_TEXT_COLOR_BLUE +

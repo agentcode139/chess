@@ -34,6 +34,7 @@ public class ChessGame {
     public void setActive(boolean active) {
         this.active = active;
     }
+
     /**
      * @return Which team's turn it is
      */

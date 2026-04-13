@@ -16,13 +16,16 @@ import websocket.messages.ServerMessage;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class WebSocketsFacade extends Endpoint {
 
     private final Gson gson = new Gson();
-    private Session session;
+    private final Session session;
     private ChessGame game;
 
     public WebSocketsFacade(String url) {
@@ -64,21 +67,22 @@ public class WebSocketsFacade extends Endpoint {
 
     }
 
-    private void load_game(LoadGameMessage loadGameMessage){
+    private void load_game(LoadGameMessage loadGameMessage) {
         game = loadGameMessage.getChessGame();
     }
 
-    private void errorHandle(ErrorMessage errorMessage){
+    private void errorHandle(ErrorMessage errorMessage) {
         System.out.print(errorMessage.getErrorMessage());
     }
 
-    private void notification(NoticationMessage noticationMessage){
+    private void notification(NoticationMessage noticationMessage) {
         System.out.print(noticationMessage.getMessage());
     }
 
     public void printGame(ChessGame.TeamColor view) {
         ChessBoardDisplay.drawChessBoard(game.getBoard(), view);
     }
+
     public void printGame(ChessGame.TeamColor view, ChessPosition chessPosition) {
         Collection<ChessMove> validMoves = game.validMoves(chessPosition);
         Map<Integer, Set<Integer>> validSpots = new ConcurrentHashMap<>();
@@ -91,7 +95,7 @@ public class WebSocketsFacade extends Endpoint {
 
     public void connect(String authtoken, int gameID) throws IOException {
         String message = gson.toJson(
-                new UserGameCommand(UserGameCommand.CommandType.CONNECT,authtoken,gameID)
+                new UserGameCommand(UserGameCommand.CommandType.CONNECT, authtoken, gameID)
         );
         session.getBasicRemote().sendText(message);
 
@@ -101,27 +105,27 @@ public class WebSocketsFacade extends Endpoint {
 
     public void makeMove(String authtoken, int gameID, ChessMove move) throws IOException {
         String message = gson.toJson(
-                new MakeMoveCommand(authtoken,gameID,move)
+                new MakeMoveCommand(authtoken, gameID, move)
         );
         session.getBasicRemote().sendText(message);
     }
 
     public void resign(String authtoken, int gameID) throws IOException {
         String message = gson.toJson(
-                new UserGameCommand(UserGameCommand.CommandType.RESIGN,authtoken,gameID)
+                new UserGameCommand(UserGameCommand.CommandType.RESIGN, authtoken, gameID)
         );
         session.getBasicRemote().sendText(message);
     }
 
     public void leave(String authtoken, int gameID) throws IOException {
         String message = gson.toJson(
-                new UserGameCommand(UserGameCommand.CommandType.LEAVE,authtoken,gameID)
+                new UserGameCommand(UserGameCommand.CommandType.LEAVE, authtoken, gameID)
         );
         session.getBasicRemote().sendText(message);
     }
 
 
-
     @Override
-    public void onOpen(Session session, EndpointConfig endpointConfig) {}
+    public void onOpen(Session session, EndpointConfig endpointConfig) {
+    }
 }

@@ -40,8 +40,9 @@ public class ChessBoardDisplay {
         }
         drawLetterRow(out, view);
     }
+
     public static void drawChessBoard(chess.ChessBoard board, ChessGame.TeamColor view) {
-        drawChessBoard(board, view,new ConcurrentHashMap<>());
+        drawChessBoard(board, view, new ConcurrentHashMap<>());
     }
 
     private static void drawPieceChessBoardRow(PrintStream out, PlaceColor color, int i, ChessBoard board, ChessGame.TeamColor team, Set<Integer> highlight) {
@@ -49,7 +50,7 @@ public class ChessBoardDisplay {
         int boardRow = (team == ChessGame.TeamColor.BLACK) ? (i + 1) : (8 - i);
         out.print(boardRow);
         for (int j = 0; j < BOARD_SIZE; j++) {
-            if (highlight != null && highlight.contains(i)){
+            if (highlight != null && highlight.contains(i)) {
                 switch (color) {
                     case PlaceColor.WHITE -> setGreen(out);
                     case PlaceColor.BLACK -> setDarkGreen(out);
@@ -62,7 +63,7 @@ public class ChessBoardDisplay {
             }
             out.print(" ");
             ChessPosition pos;
-            if (team == ChessGame.TeamColor.BLACK){
+            if (team == ChessGame.TeamColor.BLACK) {
                 pos = new ChessPosition(i + 1, 8 - j);
             } else {
                 pos = new ChessPosition(8 - i, j + 1);
@@ -85,7 +86,7 @@ public class ChessBoardDisplay {
         setLightGreyWithText(out);
         out.print(" ");
         for (int i = 0; i < BOARD_SIZE; i++) {
-            if (highlight != null && highlight.contains(i)){
+            if (highlight != null && highlight.contains(i)) {
                 switch (color) {
                     case PlaceColor.WHITE -> setGreen(out);
                     case PlaceColor.BLACK -> setDarkGreen(out);

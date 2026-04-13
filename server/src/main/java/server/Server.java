@@ -3,12 +3,12 @@ package server;
 import com.google.gson.Gson;
 import dataaccess.DatabaseManager;
 import dataaccess.exception.DataAccessException;
-import io.javalin.Javalin;
-import io.javalin.http.Context;
-import org.jetbrains.annotations.NotNull;
 import exception.BadRequestException;
 import exception.ServiceException;
 import exception.UnauthorizedException;
+import io.javalin.Javalin;
+import io.javalin.http.Context;
+import org.jetbrains.annotations.NotNull;
 import request.CreateGameRequest;
 import request.JoinGameRequest;
 import request.LoginRequest;
@@ -39,7 +39,7 @@ public class Server {
                 .put("/game", this::joinGame)
                 .delete("/db", this::clear)
                 .exception(ServiceException.class, this::handleException)
-                .ws("/ws",ws -> {
+                .ws("/ws", ws -> {
                     ws.onConnect(webSocket);
                     ws.onMessage(webSocket);
                     ws.onClose(webSocket);
