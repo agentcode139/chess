@@ -1,6 +1,8 @@
 package client;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPiece;
 import chess.ChessPosition;
 import exception.BadRequestException;
 import exception.GameIDStringException;
@@ -13,7 +15,6 @@ import request.RegisterRequest;
 import result.CreateGameResult;
 import result.ListGamesResult;
 import result.LoginResult;
-import ui.ChessBoardDisplay;
 
 import java.io.IOException;
 import java.util.*;
@@ -114,13 +115,9 @@ public class ClientCommunicator {
         ws.printGame(perspective);
         return "";
     }
-    public String highlight(String... params) throws NotEnoughParamsException {
-        if (params.length >= 3) {
-            //var out = new StringBuilder();
-            int row = 0;
-            int col = 0;
-            ChessPosition pos = new ChessPosition(row, col);
-            ws.printGame(perspective,pos);
+    public String highlight(String... params) throws NotEnoughParamsException, BadRequestException {
+        if (params.length >= 1) {
+            ws.printGame(perspective,stringToPos(params[0].toLowerCase()));
             return "";
         }
         throw new NotEnoughParamsException();
@@ -128,17 +125,53 @@ public class ClientCommunicator {
 
     public String leave() throws IOException {
         ws.leave(authtoken, joinedGameID);
+        uiState = UIStates.POSTLOGIN;
         return "You have left";
     }
     public String resign() throws IOException {
         ws.resign(authtoken, joinedGameID);
-        return "";
+        return "You have resigned";
+    }
+
+    private ChessPosition stringToPos(String str) throws BadRequestException {
+        assert str.length() == 2;
+        int row = switch (str.charAt(1)){
+            case 'a' -> 1;
+            case 'b' -> 2;
+            case 'c' -> 3;
+            case 'd' -> 4;
+            case 'e' -> 5;
+            case 'f' -> 6;
+            case 'g' -> 7;
+            case 'h' -> 8;
+            default -> throw new BadRequestException();
+        };
+        int col = str.charAt(0) - '0';
+        assert 0 < col && col < 9;
+
+        return new ChessPosition(row,col);
     }
 
     public String make(String... params) throws Exception {
-      if (params.length >= 3) {
-//        ChessMove
-//        ws.makeMove(authtoken, joinedGameID, move);
+      if (params.length >= 2) {
+
+        ChessPiece.PieceType promo;
+        if (params.length >= 3) {
+            promo = switch (params[2].toLowerCase()) {
+                case "pawn" -> ChessPiece.PieceType.PAWN;
+                case "king" -> ChessPiece.PieceType.KING;
+                case "queen" -> ChessPiece.PieceType.QUEEN;
+                case "knight" -> ChessPiece.PieceType.KNIGHT;
+                case "bishop" -> ChessPiece.PieceType.BISHOP;
+                case "rook" -> ChessPiece.PieceType.ROOK;
+                default -> null;
+            };
+        } else {
+            promo = null;
+        }
+        ChessMove move = new ChessMove(stringToPos(params[0].toLowerCase()),stringToPos(params[1].toLowerCase()),promo);
+        ws.makeMove(authtoken, joinedGameID, move);
+          //redraw();
           return "";
       }
       throw new NotEnoughParamsException();
@@ -226,6 +259,7 @@ public class ClientCommunicator {
                 perspective = (Objects.equals(params[1].toUpperCase(), "WHITE")) ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
                 ws.connect(authtoken,id);
                 joinedGameID = id;
+                //redraw();
                 return "Joined";
             } catch (Exception ignored) {
                 throw new GameIDStringException();
@@ -246,6 +280,7 @@ public class ClientCommunicator {
                 }
                 uiState = UIStates.OBSERVE;
                 ws.connect(authtoken,id);
+                redraw();
                 return "Watching";
             } catch (Exception ignore) {
                 throw new GameIDStringException();

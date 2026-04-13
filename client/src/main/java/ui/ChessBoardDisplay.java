@@ -9,6 +9,7 @@ import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static ui.EscapeSequences.*;
 
@@ -40,7 +41,7 @@ public class ChessBoardDisplay {
         drawLetterRow(out, view);
     }
     public static void drawChessBoard(chess.ChessBoard board, ChessGame.TeamColor view) {
-        drawChessBoard(board, view,null);
+        drawChessBoard(board, view,new ConcurrentHashMap<>());
     }
 
     private static void drawPieceChessBoardRow(PrintStream out, PlaceColor color, int i, ChessBoard board, ChessGame.TeamColor team, Set<Integer> highlight) {
@@ -48,7 +49,7 @@ public class ChessBoardDisplay {
         int boardRow = (team == ChessGame.TeamColor.BLACK) ? (i + 1) : (8 - i);
         out.print(boardRow);
         for (int j = 0; j < BOARD_SIZE; j++) {
-            if (highlight.contains(i)){
+            if (highlight != null && highlight.contains(i)){
                 switch (color) {
                     case PlaceColor.WHITE -> setGreen(out);
                     case PlaceColor.BLACK -> setDarkGreen(out);
@@ -84,7 +85,7 @@ public class ChessBoardDisplay {
         setLightGreyWithText(out);
         out.print(" ");
         for (int i = 0; i < BOARD_SIZE; i++) {
-            if (highlight.contains(i)){
+            if (highlight != null && highlight.contains(i)){
                 switch (color) {
                     case PlaceColor.WHITE -> setGreen(out);
                     case PlaceColor.BLACK -> setDarkGreen(out);
